@@ -40,7 +40,34 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Benchmark-first**: Plan defines reproducible metrics and the command or
+  workflow that will produce them before success is claimed.
+- **Tool validation**: Plan identifies tool schemas touched by the feature and
+  confirms calls cannot execute before schema validation succeeds.
+- **JSON outputs**: Plan explains how raw model output, invalid JSON, repair
+  attempts, parsed output, and validation errors will be captured.
+- **Dataset discipline**: Plan specifies dataset versioning and deterministic
+  train/validation/test split behavior for any dataset changes.
+- **Modality parity**: Plan confirms text and audio evaluations use the same
+  semantic examples when both modalities are involved.
+- **Tool scope**: Plan confirms `units.convert` is the primary MVP tool and
+  weather behavior is not required for MVP datasets, prompts, schemas, pipelines,
+  tests, or reports.
+- **Experiment artifacts**: Plan lists saved inputs, raw outputs, parsed
+  outputs, validation errors, metrics, and artifact retention behavior.
+- **Modular boundary**: Plan identifies affected packages among dataset
+  generation, TTS, model runner, pipeline runner, metrics, and reports.
+- **Required tests**: Plan includes tests for schema validation, parser repair,
+  metrics, and pipeline orchestration when those areas change.
+- **CI coverage**: Plan confirms PR CI will run lint, formatting check,
+  typecheck, tests, and a smoke benchmark.
+- **Full benchmarks**: Plan identifies whether full audio/model benchmarks are
+  required and whether they run manually or on self-hosted GPU runners.
+- **Git hygiene**: Plan confirms large generated artifacts will not be committed
+  and CI benchmark outputs will be uploaded as GitHub Actions artifacts with
+  limited retention.
+- **PR evidence**: Plan names the spec task and validation evidence expected in
+  the pull request.
 
 ## Project Structure
 

@@ -9,7 +9,10 @@ description: "Task list template for feature implementation"
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Tests are REQUIRED when the feature touches schema validation, parser
+repair, metrics, pipeline orchestration, dataset generation, TTS, model running,
+or report generation. The examples below include test tasks that MUST be adapted
+for those areas when applicable.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -69,6 +72,12 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T007 Create base models/entities that all stories depend on
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management
+- [ ] T010 [P] Define JSON output schema and validation fixtures
+- [ ] T011 [P] Define dataset versioning and deterministic split configuration
+- [ ] T012 Configure experiment artifact storage for inputs, raw outputs, parsed outputs, validation errors, and metrics
+- [ ] T013 Configure CI jobs for lint, formatting check, typecheck, tests, and smoke benchmark
+- [ ] T014 Configure GitHub Actions artifact upload with limited retention for benchmark outputs
+- [ ] T015 Document manual or self-hosted GPU trigger for full audio/model benchmarks
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -80,21 +89,23 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (REQUIRED when touched by this story) ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T016 [P] [US1] Schema validation test for [tool/output] in tests/unit/test_[name].py
+- [ ] T017 [P] [US1] Parser repair test for invalid JSON handling in tests/unit/test_[name].py
+- [ ] T018 [P] [US1] Metrics test for [benchmark metric] in tests/unit/test_[name].py
+- [ ] T019 [P] [US1] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T020 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T021 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T022 [US1] Implement [Service] in src/services/[service].py (depends on T020, T021)
+- [ ] T023 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T024 [US1] Add schema validation and JSON failure handling
+- [ ] T025 [US1] Add experiment artifact logging for user story 1 operations
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -106,17 +117,19 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2 (REQUIRED when touched by this story) ⚠️
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T026 [P] [US2] Schema validation test for [tool/output] in tests/unit/test_[name].py
+- [ ] T027 [P] [US2] Parser repair or invalid JSON handling test in tests/unit/test_[name].py
+- [ ] T028 [P] [US2] Metrics test for [benchmark metric] in tests/unit/test_[name].py
+- [ ] T029 [P] [US2] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T030 [P] [US2] Create [Entity] model in src/models/[entity].py
+- [ ] T031 [US2] Implement [Service] in src/services/[service].py
+- [ ] T032 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T033 [US2] Integrate with User Story 1 components (if needed)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -128,16 +141,17 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3 (REQUIRED when touched by this story) ⚠️
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T034 [P] [US3] Schema validation test for [tool/output] in tests/unit/test_[name].py
+- [ ] T035 [P] [US3] Metrics test for [benchmark metric] in tests/unit/test_[name].py
+- [ ] T036 [P] [US3] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T037 [P] [US3] Create [Entity] model in src/models/[entity].py
+- [ ] T038 [US3] Implement [Service] in src/services/[service].py
+- [ ] T039 [US3] Implement [endpoint/feature] in src/[location]/[file].py
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -154,8 +168,10 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX [P] Additional unit tests required by changed benchmark components in tests/unit/
 - [ ] TXXX Security hardening
+- [ ] TXXX Verify large generated artifacts are excluded from Git
+- [ ] TXXX Verify pull request evidence links to the spec task and validation results
 - [ ] TXXX Run quickstart.md validation
 
 ---
@@ -179,7 +195,7 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Within Each User Story
 
-- Tests (if included) MUST be written and FAIL before implementation
+- Required tests MUST be written and FAIL before implementation
 - Models before services
 - Services before endpoints
 - Core implementation before integration
@@ -199,9 +215,9 @@ Examples of foundational tasks (adjust based on your project):
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together (if tests requested):
-Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
-Task: "Integration test for [user journey] in tests/integration/test_[name].py"
+# Launch all tests for User Story 1 together:
+Task: "Schema validation test for [tool/output] in tests/unit/test_[name].py"
+Task: "Pipeline orchestration test for [user journey] in tests/integration/test_[name].py"
 
 # Launch all models for User Story 1 together:
 Task: "Create [Entity1] model in src/models/[entity1].py"

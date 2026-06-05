@@ -92,16 +92,40 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-006**: System MUST define benchmark metrics before declaring the feature successful
+- **FR-007**: System MUST validate tool calls against schema before execution
+- **FR-008**: System MUST log invalid JSON as a failure with raw model output and validation details
+- **FR-009**: System MUST version datasets and produce deterministic train/validation/test splits
+- **FR-010**: System MUST support Russian and English requests when the feature affects request data
+- **FR-011**: System MUST save experiment inputs, raw outputs, parsed outputs, validation errors, and metrics
+- **FR-012**: System MUST use `units.convert` as the primary MVP tool and MUST NOT require weather behavior for the MVP
+- **FR-013**: System MUST run PR CI with lint, formatting check, typecheck, tests, and smoke benchmark
+- **FR-014**: System MUST run full audio/model benchmarks manually or on self-hosted GPU runners when required
+- **FR-015**: System MUST NOT commit large generated artifacts to Git
+- **FR-016**: System MUST upload CI benchmark outputs as GitHub Actions artifacts with limited retention
+- **FR-017**: Pull requests MUST link to a spec task and include validation evidence
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-018**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-019**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
+
+### Benchmark and Dataset Requirements *(mandatory for benchmark changes)*
+
+- **Dataset Version**: [Version identifier and compatibility expectations]
+- **Split Strategy**: [Deterministic train/validation/test split rule and seed/source]
+- **Languages**: [Russian, English, or both; include rationale for exclusions]
+- **Modalities**: [Text, audio, or both; explain how semantic examples stay aligned]
+- **Allowed Tools**: [`units.convert` for MVP; weather is not part of MVP]
+- **Artifact Logging**: [Inputs, raw model outputs, parsed outputs, validation errors, metrics]
+- **Failure Handling**: [Invalid JSON, schema validation errors, unsupported tool calls]
+- **CI Evidence**: [Lint, formatting check, typecheck, tests, smoke benchmark, artifact retention]
+- **Full Benchmark Trigger**: [Manual trigger or self-hosted GPU runner expectation]
 
 ## Success Criteria *(mandatory)*
 
