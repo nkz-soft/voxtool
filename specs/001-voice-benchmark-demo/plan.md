@@ -1,6 +1,6 @@
 # Implementation Plan: Multilingual Voice Benchmark Demo
 
-**Branch**: `001-voice-benchmark-demo` | **Date**: 2026-06-06 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-voice-benchmark-planning` | **Date**: 2026-06-06 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `/specs/001-voice-benchmark-demo/spec.md`
 

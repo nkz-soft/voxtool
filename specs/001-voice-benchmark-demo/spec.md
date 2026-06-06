@@ -1,6 +1,6 @@
 # Feature Specification: Multilingual Voice Benchmark Demo
 
-**Feature Branch**: `001-voice-benchmark-demo`
+**Feature Branch**: `001-voice-benchmark-planning`
 
 **Created**: 2026-06-06
 
