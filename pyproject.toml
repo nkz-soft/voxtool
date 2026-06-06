@@ -5,7 +5,7 @@ description = "Multilingual voice assistant benchmark and demo scaffold."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.115.0",
+    "fastapi>=0.136.3",
     "jiwer>=3.0.5",
     "pandas>=2.2.0",
     "pydantic>=2.8.0",
