@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/voxtool/model-output.schema.json",
+  "title": "ModelOutputEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["needs_tool", "tool_call", "final_answer"],
+  "properties": {
+    "needs_tool": {
+      "type": "boolean"
+    },
+    "tool_call": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/toolInvocation"
+        }
+      ]
+    },
+    "final_answer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transcript": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "needs_tool": {
+            "const": false
+          }
+        },
+        "required": ["needs_tool"]
+      },
+      "then": {
+        "properties": {
+          "tool_call": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "needs_tool": {
+            "const": true
+          }
+        },
+        "required": ["needs_tool"]
+      },
+      "then": {
+        "properties": {
+          "tool_call": {
+            "$ref": "#/$defs/toolInvocation"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "unit": {
+      "type": "string",
+      "enum": [
+        "meter",
+        "kilometer",
+        "centimeter",
+        "millimeter",
+        "gram",
+        "kilogram",
+        "pound",
+        "ounce",
+        "celsius",
+        "fahrenheit"
+      ]
+    },
+    "toolInvocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "arguments"],
+      "properties": {
+        "tool": {
+          "const": "units.convert"
+        },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "from_unit", "to_unit"],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "from_unit": {
+              "$ref": "#/$defs/unit"
+            },
+            "to_unit": {
+              "$ref": "#/$defs/unit"
+            }
+          }
+        }
+      }
+    }
+  }
+}
