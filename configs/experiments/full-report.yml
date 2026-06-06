@@ -1,0 +1,8 @@
+name: full-report
+dataset_version: manual
+model: configurable
+limit: null
+languages: [en, ru]
+pipelines: [A, B, C, D]
+artifact_dir: reports/full
+manual_only: true

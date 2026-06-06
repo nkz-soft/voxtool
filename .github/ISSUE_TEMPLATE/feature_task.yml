@@ -1,0 +1,18 @@
+name: Feature Task
+description: Track implementation work tied to Spec Kit tasks.
+title: "[Task]: "
+labels: ["feature-task"]
+body:
+  - type: input
+    id: speckit_task_ids
+    attributes:
+      label: Spec Kit task IDs
+      description: Example: T009, T040
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+    validations:
+      required: true

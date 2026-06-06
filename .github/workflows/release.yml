@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Install dependencies
+        run: make install
+      - name: Build smoke report artifact
+        run: |
+          make benchmark-smoke
+          uv run python scripts/build_report.py --input reports/smoke --output reports/smoke-report.md
+      - name: Upload release report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-smoke-report
+          path: |
+            reports/smoke
+            reports/smoke-report.md
+          retention-days: 90

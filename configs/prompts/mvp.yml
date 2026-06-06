@@ -1,0 +1,9 @@
+name: mvp-json-tool-use
+language: [en, ru]
+required_output: json
+tool_scope:
+  - units.convert
+instructions:
+  - Decide whether the request requires a tool.
+  - Return machine-readable JSON only.
+  - Use units.convert only when conversion is required.
