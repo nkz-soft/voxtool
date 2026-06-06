@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voxtool.local/contracts/tool-invocation.schema.json",
+  "title": "ToolInvocation",
+  "type": "object",
+  "required": ["tool_name", "arguments"],
+  "additionalProperties": false,
+  "properties": {
+    "tool_name": {
+      "const": "units.convert"
+    },
+    "arguments": {
+      "type": "object",
+      "required": ["value", "from_unit", "to_unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "from_unit": {
+          "$ref": "#/$defs/unit"
+        },
+        "to_unit": {
+          "$ref": "#/$defs/unit"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "unit": {
+      "type": "string",
+      "enum": [
+        "meters",
+        "kilometers",
+        "centimeters",
+        "millimeters",
+        "grams",
+        "kilograms",
+        "pounds",
+        "ounces",
+        "Celsius",
+        "Fahrenheit"
+      ]
+    }
+  }
+}
