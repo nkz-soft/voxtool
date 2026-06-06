@@ -216,3 +216,40 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Generated benchmark artifacts
+data/raw/**
+data/processed/**
+data/fixtures/generated/**
+reports/**
+artifacts/
+outputs/
+eval-results/
+benchmark-results/
+audio-generated/
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.parquet
+*.arrow
+*.jsonl.gz
+
+# Model and experiment stores
+models/
+model-files/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+wandb/
+mlruns/
+large-datasets/
+
+# Keep repository placeholders and policy docs
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/README.md
+!reports/.gitkeep
+!reports/README.md
