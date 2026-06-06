@@ -20,7 +20,7 @@ jobs:
       - name: Run MockModelAdapter smoke benchmark
         run: make benchmark-smoke
       - name: Upload smoke artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-smoke
           path: reports/smoke
