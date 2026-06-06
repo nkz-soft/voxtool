@@ -9,6 +9,10 @@ files, GitHub workflows, GitHub issue/PR templates, README/developer commands,
 and validation tasks. Benchmark implementation internals are intentionally left
 for later task batches.
 
+A later task batch MUST cover `units.convert`, schema validation, parser repair,
+dataset generation, TTS synthesis, model adapters, pipelines A-D, metrics, and
+report generation before full feature implementation is considered complete.
+
 **Format**: `[ID] [P?] Description with exact file path`
 
 ## Phase 1: Speckit and Repository Metadata

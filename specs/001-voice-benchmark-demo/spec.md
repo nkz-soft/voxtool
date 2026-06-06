@@ -12,7 +12,7 @@
 
 ### Session 2026-06-06
 
-- Q: What exact repository structure should be required? -> A: Top-level required folders plus fixed package areas: `packages/datasets`, `packages/tts`, `packages/model-runner`, `packages/pipeline-runner`, `packages/tools`, `packages/metrics`, `packages/reports`, with apps for demo/backend.
+- Q: What exact repository structure should be required? -> A: Top-level required folders plus fixed package areas: `packages/dataset_builder`, `packages/tts_synth`, `packages/model_runner`, `packages/pipeline_runner`, `packages/tool_schema`, `packages/metrics`, `packages/report_builder`, with `apps/api`, `apps/cli`, and `apps/notebook`.
 - Q: What artifact retention policy should workflow outputs use? -> A: PR coverage and smoke benchmark artifacts retained for 14 days; manual full benchmark and release report artifacts retained for 90 days.
 - Q: Which workflows or operations must be manual-only? -> A: Full audio/model benchmarks, real model runs, paid API runs, large audio generation, report generation, and release publishing.
 - Q: Which GitHub issue types are required? -> A: Feature Task, Benchmark Experiment, Bug, and Documentation/Process.
@@ -127,8 +127,7 @@ A contributor opens a pull request and can demonstrate that benchmark, CI, artif
 - **FR-018**: All datasets MUST be versioned and use deterministic train, validation, and test splits.
 - **FR-019**: Every experiment MUST save inputs, raw model outputs, parsed outputs, validation errors, and metrics.
 - **FR-020**: The repository MUST include `apps/`, `packages/`, `configs/`, `data/`, `reports/`, `scripts/`, `specs/`, `tests/`, and `.github/`.
-- **FR-021**: The repository MUST keep dataset generation, TTS, model runner, pipeline runner, tools, metrics, and report generation in fixed package areas: `packages/datasets`, `packages/tts`, `packages/model-runner`, `packages/pipeline-runner`, `packages/tools`, `packages/metrics`, and `packages/reports`.
-- **FR-032**: The repository MUST include app areas for the demo user experience and backend tool execution.
+- **FR-021**: The repository MUST keep dataset generation, TTS, model runner, pipeline runner, tool schema, metrics, and report generation in fixed package areas: `packages/dataset_builder`, `packages/tts_synth`, `packages/model_runner`, `packages/pipeline_runner`, `packages/tool_schema`, `packages/metrics`, and `packages/report_builder`.
 - **FR-022**: CI MUST include a normal pull request workflow for lint, formatting check, typecheck, tests, and coverage artifact.
 - **FR-023**: CI MUST include a deterministic smoke benchmark workflow using a mock model adapter.
 - **FR-024**: CI/CD MUST include a manually triggered full benchmark report workflow.
@@ -139,6 +138,7 @@ A contributor opens a pull request and can demonstrate that benchmark, CI, artif
 - **FR-029**: Pull requests MUST use a template that links to Speckit task IDs and includes validation evidence.
 - **FR-030**: Benchmark Experiment issues MUST capture hypothesis, pipeline, setup, metrics, and result.
 - **FR-031**: Tests MUST cover schema validation, parser repair, metrics, and pipeline orchestration.
+- **FR-032**: The repository MUST include app areas for the demo user experience, CLI workflows, notebooks, and backend tool execution.
 - **FR-033**: Pull request coverage and smoke benchmark artifacts MUST be retained for 14 days.
 - **FR-034**: Manual full benchmark and release report artifacts MUST be retained for 90 days.
 - **FR-035**: Full audio/model benchmarks, real model runs, paid API runs, large audio generation, report generation, and release publishing MUST be manual-only.
