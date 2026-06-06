@@ -19,14 +19,14 @@ report generation before full feature implementation is considered complete.
 
 **Purpose**: Preserve feature planning artifacts and define repository artifact policy before code scaffold work begins.
 
-- [ ] T001 Create feature task index in specs/001-voice-benchmark-demo/tasks.md
-- [ ] T002 [P] Add generated artifact exclusions to .gitignore
-- [ ] T003 [P] Add repository editor settings for Python formatting in .editorconfig
-- [ ] T004 [P] Add artifact directory policy notes in data/README.md
-- [ ] T005 [P] Add report artifact policy notes in reports/README.md
-- [ ] T006 [P] Add placeholder file for raw data directory in data/raw/.gitkeep
-- [ ] T007 [P] Add placeholder file for processed data directory in data/processed/.gitkeep
-- [ ] T008 [P] Add placeholder file for reports directory in reports/.gitkeep
+- [X] T001 Create feature task index in specs/001-voice-benchmark-demo/tasks.md
+- [X] T002 [P] Add generated artifact exclusions to .gitignore
+- [X] T003 [P] Add repository editor settings for Python formatting in .editorconfig
+- [X] T004 [P] Add artifact directory policy notes in data/README.md
+- [X] T005 [P] Add report artifact policy notes in reports/README.md
+- [X] T006 [P] Add placeholder file for raw data directory in data/raw/.gitkeep
+- [X] T007 [P] Add placeholder file for processed data directory in data/processed/.gitkeep
+- [X] T008 [P] Add placeholder file for reports directory in reports/.gitkeep
 
 ## Phase 2: Python Monorepo Scaffold
 
