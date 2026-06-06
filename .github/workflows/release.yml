@@ -9,10 +9,10 @@ jobs:
   release-report:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: .python-version
       - name: Install dependencies
@@ -22,7 +22,7 @@ jobs:
           make benchmark-smoke
           uv run python scripts/build_report.py --input reports/smoke --output reports/smoke-report.md
       - name: Upload release report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-smoke-report
           path: |
