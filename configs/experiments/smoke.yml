@@ -1,0 +1,12 @@
+name: smoke
+dataset_version: smoke-v0
+model: mock
+limit: 30
+languages: [en, ru]
+pipelines: [A, B, C, D]
+artifact_dir: reports/smoke
+include_cases:
+  - tool-required
+  - no-tool
+  - invalid-json
+  - invalid-schema

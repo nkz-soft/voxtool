@@ -1,0 +1,27 @@
+name: Benchmark Smoke
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Install dependencies
+        run: make install
+      - name: Run MockModelAdapter smoke benchmark
+        run: make benchmark-smoke
+      - name: Upload smoke artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-smoke
+          path: reports/smoke
+          retention-days: 14

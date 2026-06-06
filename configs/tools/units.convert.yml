@@ -1,0 +1,16 @@
+name: units.convert
+description: Convert values between supported units.
+arguments:
+  value:
+    type: number
+    required: true
+  from_unit:
+    type: string
+    required: true
+  to_unit:
+    type: string
+    required: true
+supported_units:
+  length: [meter, kilometer, centimeter]
+  mass: [gram, kilogram]
+  temperature: [celsius, fahrenheit]

@@ -1,45 +1,18 @@
-## Summary
+## Spec Kit Traceability
 
-Describe what changed.
-
-## Related Spec / Task
-
-- Spec:
 - Task IDs:
-- GitHub Issue:
+- Related issues:
 
-## Type
-
-- [ ] Project structure
-- [ ] Tool schema
-- [ ] Dataset generation
-- [ ] TTS/audio
-- [ ] Pipeline A
-- [ ] Pipeline B
-- [ ] Pipeline C
-- [ ] Pipeline D
-- [ ] Metrics/report
-- [ ] CI/CD
-- [ ] Docs
-
-## Validation
+## Validation Evidence
 
 - [ ] `make lint`
 - [ ] `make typecheck`
 - [ ] `make test`
 - [ ] `make benchmark-smoke`
-
-## Benchmark Impact
-
-| Metric | Before | After |
-|--------|--------|-------|
-| Parsable rate | | |
-| Tool EM | | |
-| Precision | | |
-| Recall | | |
-| False alarm rate | | |
-| WER | | |
+- [ ] CI workflow run linked
+- [ ] Benchmark smoke artifact linked
+- [ ] Manual report artifact linked or marked not applicable
 
 ## Notes
 
-Known limitations or failure cases.
+Known deviations, risks, or follow-up tasks:

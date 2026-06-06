@@ -1,0 +1,39 @@
+name: Full Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Model adapter or provider to evaluate
+        required: true
+        default: mock
+      limit:
+        description: Optional example limit
+        required: false
+        default: ""
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Install dependencies
+        run: make install
+      - name: Run report benchmark
+        run: |
+          LIMIT="${{ inputs.limit }}"
+          if [ -z "$LIMIT" ]; then LIMIT=30; fi
+          uv run python scripts/run_benchmark.py --config configs/experiments/full-report.yml --model "${{ inputs.model }}" --limit "$LIMIT" --output reports/full
+      - name: Build report
+        run: uv run python scripts/build_report.py --input reports/full --output reports/full-report.md
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-report
+          path: reports/full*
+          retention-days: 90

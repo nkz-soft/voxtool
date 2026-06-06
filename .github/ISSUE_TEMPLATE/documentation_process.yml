@@ -1,0 +1,17 @@
+name: Documentation/Process
+description: Track documentation, process, or governance work.
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: Requested change
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+    validations:
+      required: true
