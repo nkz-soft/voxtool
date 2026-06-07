@@ -18,16 +18,16 @@
 
 **Purpose**: Create the Python monorepo skeleton, dependency configuration, test configuration, and artifact hygiene needed by every later phase.
 
-- [ ] T001 Create Python project metadata with runtime and dev dependencies in `pyproject.toml`
-- [ ] T002 Configure ruff lint and format settings in `pyproject.toml`
-- [ ] T003 Configure pytest discovery, markers, and test paths in `pyproject.toml`
-- [ ] T004 Create package directories with `__init__.py` files under `packages/tool_schema`, `packages/dataset_builder`, `packages/tts_synth`, `packages/model_runner`, `packages/pipeline_runner`, `packages/asr_eval`, `packages/metrics`, and `packages/report_builder`
-- [ ] T005 Create app package directories with `__init__.py` files under `apps/cli`, `apps/api`, and `apps/notebook`
-- [ ] T006 [P] Create configuration directories and placeholder README files in `configs/prompts/README.md`, `configs/tools/README.md`, `configs/models/README.md`, and `configs/experiments/README.md`
-- [ ] T007 [P] Create script entrypoint placeholders in `scripts/generate_dataset.py`, `scripts/synthesize_audio.py`, `scripts/run_benchmark.py`, and `scripts/build_report.py`
-- [ ] T008 [P] Create test package structure with `tests/unit/__init__.py`, `tests/integration/__init__.py`, and `tests/e2e/__init__.py`
-- [ ] T009 Configure generated artifact exclusions for `data/generated/`, `runs/`, `reports/*.md`, audio files, model files, checkpoints, `wandb/`, and `mlruns/` in `.gitignore`
-- [ ] T010 [P] Add tracked artifact placeholder files in `data/raw/.gitkeep`, `data/processed/.gitkeep`, `data/fixtures/.gitkeep`, and `reports/.gitkeep`
+- [X] T001 Create Python project metadata with runtime and dev dependencies in `pyproject.toml`
+- [X] T002 Configure ruff lint and format settings in `pyproject.toml`
+- [X] T003 Configure pytest discovery, markers, and test paths in `pyproject.toml`
+- [X] T004 Create package directories with `__init__.py` files under `packages/tool_schema`, `packages/dataset_builder`, `packages/tts_synth`, `packages/model_runner`, `packages/pipeline_runner`, `packages/asr_eval`, `packages/metrics`, and `packages/report_builder`
+- [X] T005 Create app package directories with `__init__.py` files under `apps/cli`, `apps/api`, and `apps/notebook`
+- [X] T006 [P] Create configuration directories and placeholder README files in `configs/prompts/README.md`, `configs/tools/README.md`, `configs/models/README.md`, and `configs/experiments/README.md`
+- [X] T007 [P] Create script entrypoint placeholders in `scripts/generate_dataset.py`, `scripts/synthesize_audio.py`, `scripts/run_benchmark.py`, and `scripts/build_report.py`
+- [X] T008 [P] Create test package structure with `tests/unit/__init__.py`, `tests/integration/__init__.py`, and `tests/e2e/__init__.py`
+- [X] T009 Configure generated artifact exclusions for `data/generated/`, `runs/`, `reports/*.md`, audio files, model files, checkpoints, `wandb/`, and `mlruns/` in `.gitignore`
+- [X] T010 [P] Add tracked artifact placeholder files in `data/raw/.gitkeep`, `data/processed/.gitkeep`, `data/fixtures/.gitkeep`, and `reports/.gitkeep`
 
 ---
 
