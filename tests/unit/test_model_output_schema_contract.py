@@ -38,6 +38,22 @@ def test_json_schema_accepts_valid_tool_envelope() -> None:
     )
 
 
+def test_json_schema_accepts_unknown_tool_name_for_registry_validation() -> None:
+    validate_model_output(
+        {
+            "needs_tool": True,
+            "tool_call": {
+                "tool": "weather.lookup",
+                "arguments": {
+                    "location": "London",
+                },
+            },
+            "final_answer": "Unsupported.",
+        },
+        schema=load_model_output_schema(SPEC_SCHEMA_PATH),
+    )
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -57,18 +73,6 @@ def test_json_schema_accepts_valid_tool_envelope() -> None:
             "needs_tool": True,
             "tool_call": None,
             "final_answer": "2 kilograms is 2000 grams.",
-        },
-        {
-            "needs_tool": True,
-            "tool_call": {
-                "tool": "weather.lookup",
-                "arguments": {
-                    "value": 2,
-                    "from_unit": "kilogram",
-                    "to_unit": "gram",
-                },
-            },
-            "final_answer": "Unsupported.",
         },
     ],
 )
