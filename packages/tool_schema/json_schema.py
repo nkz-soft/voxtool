@@ -1,7 +1,7 @@
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from jsonschema import Draft202012Validator
 
@@ -16,7 +16,7 @@ DEFAULT_SCHEMA_PATH = (
 def load_model_output_schema(path: str | Path | None = None) -> dict[str, Any]:
     schema_path = Path(path) if path is not None else DEFAULT_SCHEMA_PATH
     with schema_path.open(encoding="utf-8") as schema_file:
-        schema = json.load(schema_file)
+        schema = cast(dict[str, Any], json.load(schema_file))
 
     Draft202012Validator.check_schema(schema)
     return schema
