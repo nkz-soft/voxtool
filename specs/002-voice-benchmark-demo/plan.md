@@ -6,7 +6,7 @@
 
 ## Summary
 
-Build a Python 3.11+ benchmark and demo system for Russian/English voice assistant tool use. The system generates a balanced JSONL dataset with synthesized audio, runs four text/audio pipelines, parses and validates model JSON envelopes for `units.convert`, optionally executes validated conversions, records all raw and parsed artifacts, computes ASR and tool-use metrics, and produces a final markdown report plus a demo notebook. The MVP avoids weather, cloud-service requirements, and complex UI work.
+Build a Python 3.11+ benchmark and demo system for Russian/English voice assistant tool use. The system generates a balanced JSONL dataset with synthesized audio, runs four text/audio pipelines, builds model prompts from registered tool manifests, parses and validates model JSON envelopes, resolves tool calls through a unified tool provider registry, optionally executes validated `units.convert` conversions, records all raw and parsed artifacts, computes ASR and tool-use metrics, and produces a final markdown report plus a demo notebook. The MVP avoids weather, cloud-service requirements, and complex UI work.
 
 ## Technical Context
 
@@ -24,7 +24,7 @@ Build a Python 3.11+ benchmark and demo system for Russian/English voice assista
 
 **Performance Goals**: Bounded smoke benchmark completes on a normal CI runner with deterministic mock adapters; full model/audio experiments may run manually outside ordinary CI.
 
-**Constraints**: Model tool-decision outputs use the canonical JSON envelope; invalid first-pass JSON gets one retry/repair attempt; first-pass parsability remains distinct from repaired success; validated `units.convert` calls are the only executable MVP tool calls; generated datasets, audio, run outputs, checkpoints, and reports are not committed.
+**Constraints**: Model tool-decision outputs use the canonical JSON envelope; invalid first-pass JSON gets one retry/repair attempt; first-pass parsability remains distinct from repaired success; prompts consume manifests built from `ToolRegistry`; all tool calls are resolved through `ToolRegistry` and executed through `ToolExecutor`; `units.convert` is the required initial MVP provider; generated datasets, audio, run outputs, checkpoints, and reports are not committed.
 
 **Scale/Scope**: 240 synthetic text examples, 120 Russian and 120 English, 15% no-tool overall and per language, deterministic 70/15/15 split stratified by language, tool/no-tool label, and unit family; every text example has a synthesized audio counterpart.
 
@@ -33,11 +33,11 @@ Build a Python 3.11+ benchmark and demo system for Russian/English voice assista
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **Benchmark-first**: PASS. Required metrics are defined before implementation and mapped to `packages/metrics`, `packages/asr_eval`, and `packages/report_builder`.
-- **Tool validation**: PASS. `packages/tool_schema` owns Pydantic models, JSON Schema, validation errors, and deterministic `units.convert` execution; pipelines cannot execute a tool until validation succeeds.
+- **Tool validation**: PASS. `packages/tool_schema` owns Pydantic models, JSON Schema, validation errors, `ToolCall`, `ToolResult`, the `ToolProvider` interface, `ToolRegistry`, `ToolExecutor`, tool manifest building, and deterministic `units.convert` execution; pipelines cannot execute a tool except through registry lookup and validated executor calls.
 - **JSON outputs**: PASS. Raw outputs, first-pass parse status, repair attempts, parsed envelopes, and validation errors are saved for every model-output example.
 - **Dataset discipline**: PASS. Dataset versioning, deterministic stratified splits, JSONL format, and generation metadata are planned.
 - **Modality parity**: PASS. Text and audio examples share stable IDs and split assignment for modality-gap computation.
-- **Tool scope**: PASS. `units.convert` is the only MVP tool; weather is explicitly excluded from datasets, prompts, schemas, pipelines, tests, and reports.
+- **Tool scope**: PASS. `units.convert` is the required initial MVP provider; additional tools can be added only through the unified provider interface; weather is explicitly excluded from datasets, prompts, schemas, pipelines, tests, and reports.
 - **Experiment artifacts**: PASS. Runs save inputs, raw outputs, parsed outputs, validation errors, repair attempts, execution results, answers, per-example metrics, and aggregate summaries.
 - **Modular boundary**: PASS. Package boundaries are fixed for tool schema, dataset builder, TTS, model runner, pipeline runner, ASR eval, metrics, and report builder.
 - **Required tests**: PASS. Plan includes tests for schema validation, parser repair, metrics, ASR normalization/WER, dataset generation, and pipeline orchestration.
@@ -76,7 +76,7 @@ apps/
 └── notebook/            # Final demonstration notebook
 
 packages/
-├── tool_schema/         # Pydantic models, JSON Schema validation, parser repair, units.convert executor
+├── tool_schema/         # Pydantic models, JSON Schema validation, parser repair, tool calls/results, tool manifests, provider registry/executor, units.convert provider
 ├── dataset_builder/     # Synthetic JSONL text dataset generation and deterministic splits
 ├── tts_synth/           # Audio synthesis adapters, metadata, and fixture generation
 ├── model_runner/        # Gemma3nAdapter, ASRAdapter, TextLLMAdapter, MockModelAdapter
@@ -123,16 +123,16 @@ See [research.md](research.md). Decisions resolve dataset format, metrics summar
 
 ## Phase 1 Design Summary
 
-See [data-model.md](data-model.md), [quickstart.md](quickstart.md), and [contracts/](contracts/). Contracts define CLI commands, optional demo API behavior, artifact formats, and the canonical model-output JSON Schema.
+See [data-model.md](data-model.md), [quickstart.md](quickstart.md), and [contracts/](contracts/). Contracts define CLI commands, optional demo API behavior, artifact formats, registry-built tool manifests, and the canonical model-output JSON Schema.
 
 ## Post-Design Constitution Check
 
 - **Benchmark-first**: PASS. Quickstart defines dataset, smoke benchmark, audio metrics, and report commands.
-- **Tool validation**: PASS. Contracts require schema validation before optional execution.
+- **Tool validation**: PASS. Contracts require registry lookup and schema validation before optional execution.
 - **JSON outputs**: PASS. Artifact contract preserves raw output, parse status, repair status, parsed envelope, and validation errors.
 - **Dataset discipline**: PASS. Data model records version, generation settings, and deterministic split metadata.
 - **Modality parity**: PASS. Data model requires shared `example_id` for text/audio pairs.
-- **Tool scope**: PASS. Contracts only expose `units.convert`.
+- **Tool scope**: PASS. Contracts expose `units.convert` as the required provider while keeping pipelines independent of concrete tool implementations.
 - **Experiment artifacts**: PASS. Artifact contract covers per-example JSONL, metrics summaries, report markdown, and plots.
 - **Modular boundary**: PASS. Package responsibilities are named in Project Structure.
 - **Required tests**: PASS. Quickstart and contracts identify schema, repair, metrics, WER, dataset, and pipeline smoke tests.

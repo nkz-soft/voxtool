@@ -4,7 +4,7 @@
 
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [quickstart.md](quickstart.md), [contracts/](contracts/)
 
-**Tests**: TDD is required where practical for tool schema validation, `units.convert` executor, JSON parser and repair, metric calculations, dataset split generation, and pipeline orchestration with mock models.
+**Tests**: TDD is required where practical for tool schema validation, tool provider registry/executor behavior, `units.convert` provider behavior, JSON parser and repair, metric calculations, dataset split generation, and pipeline orchestration with mock models.
 
 **Organization**: Tasks are grouped by implementation phase, user story, and pipeline. Story labels map to the spec: US1 text unit conversion baseline, US2 audio transcription baseline, US3 one-pass audio tool calling, US4 cascaded audio tool calling, US5 benchmark report and demo review.
 
@@ -31,27 +31,37 @@
 
 ---
 
-## Phase 2: Tool Schema And Executor (Foundational)
+## Phase 2: Tool Schema, Registry, And Executor (Foundational)
 
-**Purpose**: Implement the validated `units.convert` trust boundary before any model output or pipeline can execute a tool.
+**Purpose**: Implement the validated tool-provider trust boundary before any model output or pipeline can execute a tool.
 
-**Independent Test**: `python -m pytest tests/unit/test_tool_schema.py tests/unit/test_units_executor.py` validates schema acceptance/rejection and deterministic conversion behavior.
+**Independent Test**: `python -m pytest tests/unit/test_tool_schema.py tests/unit/test_units_executor.py tests/unit/test_tool_registry.py tests/unit/test_tool_executor.py` validates schema acceptance/rejection, provider registration, JSON Schema export, structured failures, and deterministic conversion behavior.
 
 ### Tests First
 
 - [X] T011 [P] Create failing Pydantic model and JSON Schema validation tests for valid and invalid model envelopes in `tests/unit/test_tool_schema.py`
 - [X] T012 [P] Create failing `units.convert` executor tests for length, mass, temperature, incompatible family, and unsupported unit cases in `tests/unit/test_units_executor.py`
 - [X] T013 [P] Create failing JSON Schema contract compatibility test using `specs/002-voice-benchmark-demo/contracts/model-output.schema.json` in `tests/unit/test_model_output_schema_contract.py`
+- [ ] T013a [P] Create failing `ToolProvider` interface and JSON Schema export tests in `tests/unit/test_tool_provider.py`
+- [ ] T013b [P] Create failing `ToolRegistry` tests for provider lookup, prompt schema export, unknown tool failures, and duplicate provider names in `tests/unit/test_tool_registry.py`
+- [ ] T013c [P] Create failing `ToolExecutor` tests for valid execution, invalid argument failures, and provider execution errors in `tests/unit/test_tool_executor.py`
+- [ ] T013d [P] Create failing `ToolCall`, `ToolResult`, and tool manifest builder tests in `tests/unit/test_tool_manifest.py`
+- [ ] T013e [P] Create failing pipeline import-boundary test proving `packages/pipeline_runner` does not import concrete tool providers in `tests/unit/test_pipeline_tool_boundaries.py`
 
 ### Implementation
 
-- [X] T014 Implement unit enums, `ToolInvocation`, `ModelOutputEnvelope`, and validation error models in `packages/tool_schema/models.py`
+- [X] T014 Implement unit enums, `ToolCall`/serialized `tool_call`, `ModelOutputEnvelope`, and validation error models in `packages/tool_schema/models.py`
 - [X] T015 Implement strict JSON Schema loading and validation helpers in `packages/tool_schema/json_schema.py`
 - [X] T016 Implement deterministic `units.convert` executor with compatible-family checks in `packages/tool_schema/executor.py`
 - [X] T017 Export tool schema and executor APIs from `packages/tool_schema/__init__.py`
 - [X] T018 Add checked-in tool schema copy for runtime/config consumers in `configs/tools/model-output.schema.json`
+- [ ] T018a Implement `ToolProvider`, `ToolRegistry`, `ToolExecutor`, and structured tool failure models in `packages/tool_schema/providers.py`
+- [ ] T018b Adapt `units.convert` into a `ToolProvider` with Pydantic argument schema and JSON Schema export in `packages/tool_schema/units.py`
+- [ ] T018c Export registered tool prompt/validation schemas from `packages/tool_schema/json_schema.py` and `configs/tools/model-output.schema.json`
+- [ ] T018d Export provider registry and executor APIs from `packages/tool_schema/__init__.py`
+- [ ] T018e Implement `ToolCall`, `ToolResult`, `ToolManifest`, and registry-backed manifest builder in `packages/tool_schema/providers.py`
 
-**Checkpoint**: Tool calls can be parsed, validated, rejected, and executed deterministically without any model or pipeline code.
+**Checkpoint**: Tool calls can be parsed, resolved, validated, rejected, and executed deterministically through the registry/executor boundary without any pipeline knowing concrete tool implementations.
 
 ---
 
@@ -90,8 +100,8 @@
 ### Tests First
 
 - [ ] T029 [P] [US1] Create failing JSON parser tests for valid first-pass envelopes, invalid JSON, single repair success, and failed repair in `tests/unit/test_json_parser.py`
-- [ ] T030 [P] [US1] Create failing parser validation tests for no-tool envelope consistency and non-null false-alarm tool calls in `tests/unit/test_parser_validation.py`
-- [ ] T031 [P] [US1] Create failing prompt template existence and placeholder tests for pipelines A-D in `tests/unit/test_prompt_templates.py`
+- [ ] T030 [P] [US1] Create failing parser validation tests for no-tool envelope consistency, non-null false-alarm tool calls, unknown tools, and invalid tool arguments in `tests/unit/test_parser_validation.py`
+- [ ] T031 [P] [US1] Create failing prompt template tests proving tool prompts are built from registered tool manifests in `tests/unit/test_prompt_templates.py`
 
 ### Implementation
 
@@ -101,7 +111,7 @@
 - [ ] T035 [P] [US2] Add audio transcript prompt template in `configs/prompts/pipeline_b_transcript.md`
 - [ ] T036 [P] [US3] Add one-pass audio tool-calling prompt template in `configs/prompts/pipeline_c_audio_tool.md`
 - [ ] T037 [P] [US4] Add cascaded transcript-to-tool prompt template in `configs/prompts/pipeline_d_transcript_tool.md`
-- [ ] T038 [US1] Implement prompt loading helpers in `packages/model_runner/prompts.py`
+- [ ] T038 [US1] Implement prompt loading and registry-backed tool manifest injection helpers in `packages/model_runner/prompts.py`
 
 **Checkpoint**: Model outputs can be parsed and validated consistently before any real pipeline is implemented.
 
@@ -116,8 +126,8 @@
 ### Tests First
 
 - [ ] T039 [P] [US1] Create failing `MockModelAdapter` tests for valid tool, no-tool, invalid JSON, repaired JSON, and invalid schema outputs in `tests/unit/test_mock_model_adapter.py`
-- [ ] T040 [P] [US1] Create failing Pipeline A orchestration test with mock examples in `tests/integration/test_pipeline_a.py`
-- [ ] T041 [P] [US1] Create failing artifact writer tests for raw output, parsed output, validation error, and execution result JSONL records in `tests/unit/test_pipeline_artifacts.py`
+- [ ] T040 [P] [US1] Create failing Pipeline A orchestration test with mock examples and registry/executor-only tool calls in `tests/integration/test_pipeline_a.py`
+- [ ] T041 [P] [US1] Create failing artifact writer tests for raw output, parsed output, validation error, structured failures, and execution result JSONL records in `tests/unit/test_pipeline_artifacts.py`
 
 ### Implementation
 
@@ -125,7 +135,7 @@
 - [ ] T043 [US1] Implement deterministic `MockModelAdapter` in `packages/model_runner/mock.py`
 - [ ] T044 [P] [US1] Implement `TextLLMAdapter` placeholder interface for transcript-to-tool-call experiments in `packages/model_runner/text_llm.py`
 - [ ] T045 [US1] Implement shared pipeline artifact writer in `packages/pipeline_runner/artifacts.py`
-- [ ] T046 [US1] Implement Pipeline A orchestration in `packages/pipeline_runner/pipeline_a.py`
+- [ ] T046 [US1] Implement Pipeline A orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_a.py`
 - [ ] T047 [US1] Implement benchmark runner dispatch for Pipeline A in `packages/pipeline_runner/runner.py`
 - [ ] T048 [US1] Implement benchmark CLI command for text pipeline execution in `apps/cli/benchmark.py`
 - [ ] T049 [US1] Wire benchmark script entrypoint in `scripts/run_benchmark.py`
@@ -193,15 +203,15 @@
 ### Tests First
 
 - [ ] T068 [P] [US3] Create failing `Gemma3nAdapter` capability and mock audio-output tests in `tests/unit/test_gemma3n_adapter.py`
-- [ ] T069 [P] [US3] Create failing Pipeline C orchestration test in `tests/integration/test_pipeline_c.py`
-- [ ] T070 [P] [US4] Create failing Pipeline D orchestration test combining ASR and TextLLM adapters in `tests/integration/test_pipeline_d.py`
+- [ ] T069 [P] [US3] Create failing Pipeline C orchestration test with registry/executor-only tool calls in `tests/integration/test_pipeline_c.py`
+- [ ] T070 [P] [US4] Create failing Pipeline D orchestration test combining ASR, TextLLM adapters, and registry/executor-only tool calls in `tests/integration/test_pipeline_d.py`
 - [ ] T071 [P] [US4] Create failing all-pipelines smoke orchestration test with `MockModelAdapter` in `tests/e2e/test_all_pipelines_smoke.py`
 
 ### Implementation
 
 - [ ] T072 [P] [US3] Implement `Gemma3nAdapter` interface and local/manual-run placeholder behavior in `packages/model_runner/gemma3n.py`
-- [ ] T073 [US3] Implement Pipeline C orchestration in `packages/pipeline_runner/pipeline_c.py`
-- [ ] T074 [US4] Implement Pipeline D orchestration in `packages/pipeline_runner/pipeline_d.py`
+- [ ] T073 [US3] Implement Pipeline C orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_c.py`
+- [ ] T074 [US4] Implement Pipeline D orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_d.py`
 - [ ] T075 [US3] Extend benchmark runner dispatch for Pipelines C and D in `packages/pipeline_runner/runner.py`
 - [ ] T076 [US4] Extend benchmark CLI pipeline selection for A-D in `apps/cli/benchmark.py`
 - [ ] T077 [US3] Add experiment config examples for mock and manual Gemma3n runs in `configs/experiments/audio_tool_use.yml`
@@ -252,8 +262,8 @@
 ### Implementation
 
 - [ ] T092 [US5] Implement FastAPI app factory and dependency wiring in `apps/api/main.py`
-- [ ] T093 [US5] Implement `/demo/text` route in `apps/api/routes_text.py`
-- [ ] T094 [US5] Implement `/demo/audio` route in `apps/api/routes_audio.py`
+- [ ] T093 [US5] Implement `/demo/text` route using only `ToolRegistry` and `ToolExecutor` for tool calls in `apps/api/routes_text.py`
+- [ ] T094 [US5] Implement `/demo/audio` route using only `ToolRegistry` and `ToolExecutor` for tool calls in `apps/api/routes_audio.py`
 - [ ] T095 [US5] Add API package entrypoint in `apps/api/__main__.py`
 
 **Checkpoint**: Optional local API supports demo execution but remains secondary to CLI/notebook/report workflows.

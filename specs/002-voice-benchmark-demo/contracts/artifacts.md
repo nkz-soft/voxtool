@@ -65,11 +65,64 @@ Each line is a `PipelineRun` record:
   "repair_attempted": false,
   "repair_success": false,
   "validation_error": null,
+  "structured_failures": [],
   "transcript": null,
-  "tool_execution_result": {},
+  "tool_execution_result": {
+    "tool": "units.convert",
+    "arguments": {
+      "value": 2,
+      "from_unit": "kilometer",
+      "to_unit": "meter"
+    },
+    "result": {
+      "value": 2000,
+      "unit": "meter"
+    },
+    "execution_error": null
+  },
   "final_answer": "2 kilometers is 2000 meters."
 }
 ```
+
+## Structured Tool Failure
+
+Unknown tools, invalid arguments, duplicate provider names, and execution errors are recorded as structured failures:
+
+```json
+{
+  "failure_type": "unknown_tool",
+  "tool": "weather.lookup",
+  "message": "Tool is not registered.",
+  "details": {
+    "available_tools": ["units.convert"]
+  },
+  "stage": "registry"
+}
+```
+
+Pipeline output records include zero or more `structured_failures`. Unknown tools and invalid arguments must not produce `tool_execution_result` values.
+
+## Tool Manifest
+
+Prompt construction consumes tool manifests built from `ToolRegistry`:
+
+```json
+{
+  "name": "units.convert",
+  "description": "Convert a numeric value between supported length, mass, or temperature units.",
+  "arguments_json_schema": {
+    "type": "object",
+    "required": ["value", "from_unit", "to_unit"],
+    "properties": {
+      "value": { "type": "number" },
+      "from_unit": { "type": "string" },
+      "to_unit": { "type": "string" }
+    }
+  }
+}
+```
+
+Pipeline and prompt code must consume this manifest shape rather than importing concrete tool providers.
 
 ## Metrics Summary
 

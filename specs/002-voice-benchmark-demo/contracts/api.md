@@ -32,7 +32,9 @@ Response:
     "final_answer": "2 kilometers is 2000 meters."
   },
   "validation_error": null,
+  "structured_failures": [],
   "tool_execution_result": {
+    "tool": "units.convert",
     "result_value": 2000,
     "result_unit": "meter"
   },
@@ -73,7 +75,9 @@ Response:
     "transcript": "Convert 2 kilometers to meters"
   },
   "validation_error": null,
+  "structured_failures": [],
   "tool_execution_result": {
+    "tool": "units.convert",
     "result_value": 2000,
     "result_unit": "meter"
   },
@@ -86,9 +90,21 @@ Response:
 ```json
 {
   "error": {
-    "code": "validation_error",
-    "message": "Model output did not match schema.",
-    "details": {}
+    "code": "tool_failure",
+    "message": "Tool call could not be completed.",
+    "details": {
+      "structured_failures": [
+        {
+          "failure_type": "unknown_tool",
+          "tool": "weather.lookup",
+          "message": "Tool is not registered.",
+          "details": {
+            "available_tools": ["units.convert"]
+          },
+          "stage": "registry"
+        }
+      ]
+    }
   }
 }
 ```

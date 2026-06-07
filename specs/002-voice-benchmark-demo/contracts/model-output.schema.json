@@ -85,23 +85,28 @@
       "required": ["tool", "arguments"],
       "properties": {
         "tool": {
-          "const": "units.convert"
+          "type": "string",
+          "minLength": 1
         },
         "arguments": {
           "type": "object",
-          "additionalProperties": false,
-          "required": ["value", "from_unit", "to_unit"],
-          "properties": {
-            "value": {
-              "type": "number"
-            },
-            "from_unit": {
-              "$ref": "#/$defs/unit"
-            },
-            "to_unit": {
-              "$ref": "#/$defs/unit"
-            }
-          }
+          "additionalProperties": true
+        }
+      }
+    },
+    "unitsConvertArguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "from_unit", "to_unit"],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "from_unit": {
+          "$ref": "#/$defs/unit"
+        },
+        "to_unit": {
+          "$ref": "#/$defs/unit"
         }
       }
     }
