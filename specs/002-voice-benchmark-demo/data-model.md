@@ -21,11 +21,15 @@ Validation rules:
 - Length, mass, and temperature conversions are valid only within their compatible unit families.
 - Temperature conversions use deterministic formulas.
 
-## ToolInvocation
+## ToolCall
 
 Fields:
 
-- `tool`: required string, exactly `units.convert`
+- `tool`: required string, resolved against `ToolRegistry`
+- `arguments`: required raw object validated against the resolved provider schema before execution
+
+MVP `units.convert` arguments:
+
 - `arguments.value`: required number
 - `arguments.from_unit`: required Unit
 - `arguments.to_unit`: required Unit
@@ -34,21 +38,70 @@ Relationships:
 
 - Expected by `BenchmarkExample` when `needs_tool=true`.
 - Emitted by `ModelOutputEnvelope.tool_call` when the model predicts tool use.
-- Consumed by `ToolExecutionResult` only after schema validation succeeds.
+- Consumed by `ToolExecutor` only after registry lookup and provider argument validation succeed.
+- Backward-compatible serialized field names may still use `tool_call`, but the internal common interface model is `ToolCall`.
+
+## ToolProvider
+
+Fields:
+
+- `name`: required unique string, such as `units.convert`
+- `description`: required human-readable string
+- `argument_schema_name`: required identifier for the provider argument model
+- `argument_schema`: required Pydantic model type used for validation
+- `json_schema`: required JSON Schema export for prompts and validation
+- `execute`: required deterministic method accepting validated arguments and returning `ToolResult`
+- `deterministic`: required boolean, true for benchmark-executable providers
+
+Validation rules:
+
+- Provider names must be unique within a benchmark run.
+- Provider names must be stable and non-empty.
+- The JSON Schema export must correspond to the provider's Pydantic argument schema.
+- Providers with duplicate names are rejected before pipeline execution begins.
+
+## ToolRegistry
+
+Fields:
+
+- `providers`: mapping of tool name to `ToolProvider`
+- `schema_export`: combined prompt/validation schema for all registered providers
+- `manifest_export`: list of `ToolManifest` records built from registered providers
+
+Validation rules:
+
+- Unknown tool names resolve to structured failures.
+- Registry schema exports are the source of truth for prompt construction and validation.
+- Tool manifests are built only from registered providers.
+- Pipelines must not import or call concrete providers directly.
+
+## ToolManifest
+
+Fields:
+
+- `name`: registered provider name
+- `description`: provider description
+- `arguments_json_schema`: JSON Schema exported from the provider argument schema
+
+Validation rules:
+
+- Manifests are built only from `ToolRegistry`.
+- Prompt construction consumes manifests, not concrete tool modules.
+- Manifest names must match registered provider names.
 
 ## ModelOutputEnvelope
 
 Fields:
 
 - `needs_tool`: required boolean
-- `tool_call`: required, either null or `ToolInvocation`
+- `tool_call`: required, either null or `ToolCall`
 - `final_answer`: required string
 - `transcript`: optional string for transcript-capable pipelines
 
 Validation rules:
 
 - If `needs_tool=false`, `tool_call` must be null.
-- If `needs_tool=true`, `tool_call` must be a valid `units.convert` invocation.
+- If `needs_tool=true`, `tool_call` must name a registered tool and include arguments valid for that tool.
 - Pipeline C outputs include `transcript`.
 - Pipeline B transcript output may be recorded without a tool-call envelope because it is transcript-only.
 
@@ -63,7 +116,7 @@ Fields:
 - `unit_family`: `length`, `mass`, `temperature`, or `none`
 - `text`: reference request text
 - `needs_tool`: expected boolean
-- `expected_tool_call`: null or `ToolInvocation`
+- `expected_tool_call`: null or `ToolCall`
 - `expected_final_answer`: string
 - `audio_id`: stable ID of linked synthesized audio
 
@@ -112,8 +165,9 @@ Fields:
 - `repair_attempted`: boolean
 - `repair_success`: boolean
 - `validation_error`: null or structured error
+- `structured_failures`: list of structured parsing, validation, registry, or execution failures
 - `transcript`: optional string
-- `tool_execution_result`: optional `ToolExecutionResult`
+- `tool_execution_result`: optional `ToolResult`
 - `final_answer`: optional string
 
 State transitions:
@@ -121,25 +175,43 @@ State transitions:
 1. Pending input
 2. Raw output captured
 3. Parsed or repair attempted
-4. Schema validated or validation failed
-5. Optionally executed if validation passed and execution enabled
+4. Schema validated, registry-resolved, or validation/registry failure recorded
+5. Optionally executed through `ToolExecutor` if validation passed and execution enabled
 6. Metrics recorded
 
-## ToolExecutionResult
+## ToolResult
 
 Fields:
 
-- `tool`: `units.convert`
-- `arguments`: `ToolInvocation.arguments`
-- `result_value`: number
-- `result_unit`: Unit
-- `rounded_display`: string
+- `tool`: resolved provider name
+- `arguments`: validated `ToolCall.arguments`
+- `result`: provider-specific deterministic result object
+- `result_value`: optional number for `units.convert`
+- `result_unit`: optional Unit for `units.convert`
+- `rounded_display`: optional string for `units.convert`
 - `execution_error`: null or string
 
 Validation rules:
 
-- Created only after schema validation succeeds.
-- Conversion result uses deterministic rounding rules documented by implementation.
+- Created only by `ToolExecutor` after registry lookup and provider argument validation succeed.
+- Execution errors are represented as structured failures and do not stop unrelated examples.
+- `units.convert` results use deterministic rounding rules documented by implementation.
+- Backward-compatible serialized field names may still use `tool_execution_result`, but the internal common interface model is `ToolResult`.
+
+## StructuredToolFailure
+
+Fields:
+
+- `failure_type`: `unknown_tool`, `duplicate_tool_provider`, `invalid_arguments`, or `execution_error`
+- `tool`: requested or provider tool name when available
+- `message`: human-readable diagnostic
+- `details`: machine-readable diagnostic object
+- `stage`: `registry`, `validation`, or `execution`
+
+Validation rules:
+
+- Unknown tools and invalid arguments are never executed.
+- Execution errors retain the original validated tool name and arguments summary.
 
 ## MetricResult
 
@@ -165,7 +237,7 @@ Fields:
 Validation rules:
 
 - Parsability rate counts only first-pass valid JSON envelopes.
-- Tool-call exact match requires correct `needs_tool`, tool name, value, source unit, and target unit.
+- Tool-call exact match for the MVP dataset requires correct `needs_tool`, tool name, value, source unit, and target unit.
 - Partially correct tool calls are not exact matches but contribute to per-field argument diagnostics.
 
 ## FailureCase
@@ -176,7 +248,7 @@ Fields:
 - `pipeline`
 - `example_id`
 - `language`
-- `failure_category`: JSON parsing, repair failed, schema validation, tool decision, tool name, numeric value, source unit, target unit, transcript, execution, answer
+- `failure_category`: JSON parsing, repair failed, schema validation, unknown tool, duplicate tool provider, invalid arguments, tool decision, tool name, numeric value, source unit, target unit, transcript, execution, answer
 - `expected_summary`
 - `observed_summary`
 - `raw_output_path`

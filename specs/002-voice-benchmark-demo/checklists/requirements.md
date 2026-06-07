@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Validation passed on 2026-06-06. The user-requested optional FastAPI endpoint is represented as an optional demo execution endpoint to keep the specification implementation-neutral.
+- Validation passed on 2026-06-07 after adding the unified tool provider interface. The user-requested optional FastAPI endpoint is represented as an optional demo execution endpoint to keep the specification implementation-neutral.

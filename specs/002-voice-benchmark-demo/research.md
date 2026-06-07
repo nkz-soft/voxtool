@@ -24,6 +24,14 @@
 
 **Alternatives considered**: Pydantic-only validation was rejected because the spec requires JSON Schema validation. Hand-written validation was rejected because it is error-prone for nested envelope and tool-call rules.
 
+## Tool Provider Plugin Boundary
+
+**Decision**: Define a common tool interface for executable tools. Each provider exposes a unique name, human-readable description, Pydantic argument schema, deterministic execute method, and JSON Schema export. Model outputs are represented as `ToolCall` records before validation and `ToolResult` records after execution. Prompts are built from registry-backed tool manifests, pipelines resolve providers through `ToolRegistry`, and validated calls execute through `ToolExecutor`.
+
+**Rationale**: A registry and manifest boundary lets new tools be added to prompts, validation, and execution without changing Pipeline A-D orchestration. It also gives one place to reject unknown tools, duplicate provider names, invalid arguments, and execution errors as structured benchmark failures.
+
+**Alternatives considered**: Pipeline-specific tool dispatch was rejected because every new tool would require pipeline changes. A single hard-coded `units.convert` executor was rejected because it blocks the requested plugin extension path. Free-form callable tools were rejected because the benchmark requires JSON Schema exports and deterministic validation.
+
 ## JSON Repair Behavior
 
 **Decision**: Attempt exactly one retry or repair for invalid first-pass JSON, record repair success separately, and keep Parsable Tool Invocation Rate tied to first-pass valid JSON.

@@ -37,7 +37,10 @@ Required behavior:
 - Saves raw output for every processed example.
 - Saves parsed output when first-pass parsing or repair succeeds.
 - Saves validation errors when parsing or schema validation fails.
-- Optionally executes validated `units.convert` calls.
+- Builds registered tool manifests for prompting and validation from `ToolRegistry`.
+- Resolves tool calls only through `ToolRegistry`.
+- Optionally executes validated tool calls only through `ToolExecutor`.
+- Records structured failures for unknown tools, invalid arguments, and execution errors.
 - Writes per-example pipeline outputs and aggregate metric summaries.
 
 ### Build Report

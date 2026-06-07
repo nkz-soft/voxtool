@@ -17,7 +17,7 @@
 
 - [x] CHK005 Is the canonical model output envelope specified with required fields for tool and no-tool outputs? [Clarity, Spec §Clarifications, Spec §FR-006-FR-009]
 - [x] CHK006 Is the `units.convert` schema specified with tool name, numeric value, source unit, target unit, and supported unit set? [Completeness, Spec §FR-008-FR-012]
-- [x] CHK007 Are validation rejection cases specified for unsupported tools, missing arguments, nonnumeric values, and unsupported units? [Coverage, Spec §FR-014-FR-015]
+- [x] CHK007 Are validation rejection cases specified for unknown tools, duplicate provider names, missing arguments, nonnumeric values, unsupported units, and execution errors? [Coverage, Spec §FR-014-FR-015, Spec §FR-060-FR-063]
 - [x] CHK008 Are invalid JSON, repair attempt, first-pass parsability, and repaired-output reporting requirements distinguishable? [Clarity, Spec §FR-016-FR-019]
 
 ## Dataset And Audio Generation
@@ -49,4 +49,4 @@
 
 ## Notes
 
-- All requested benchmark coverage areas are represented in the specification after the TTS metadata clarification.
+- All requested benchmark coverage areas are represented in the specification after the TTS metadata clarification and unified tool provider update.

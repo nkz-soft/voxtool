@@ -18,6 +18,10 @@
 - Q: How should exact-match metrics treat partially correct tool calls? -> A: Official tool-call exact match requires correct `needs_tool`, tool name, value, source unit, and target unit; argument exact match reports per-field matches separately; partially correct calls count as incorrect for exact match but are categorized in failure analysis.
 - Q: What counts as a no-tool false alarm, and what must the final report include? -> A: A no-tool false alarm is any example with expected `needs_tool=false` where output `needs_tool=true` or a non-null `tool_call`; final report must include dataset summary, per-pipeline metrics, language splits, tool/no-tool confusion matrix, WER, modality gap, best-pipeline rationale, and categorized failure cases.
 
+### Session 2026-06-07
+
+- Q: How should the system support future benchmark tools without changing model pipelines? -> A: Require all tools to be exposed through a unified `ToolProvider` plugin interface and require pipelines to validate and execute tool calls only through `ToolRegistry` and `ToolExecutor`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Text Unit Conversion Baseline (Priority: P1)
@@ -98,7 +102,9 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - Model output is not valid JSON on the first attempt.
 - The single retry or repair attempt still produces invalid JSON.
 - A model emits a supported tool name with missing, nonnumeric, or unsupported unit arguments.
-- A model emits a tool other than `units.convert`.
+- A model emits an unknown tool name that is not registered.
+- A registered tool provider exposes an invalid or duplicate tool name.
+- A registered tool provider raises an execution error after argument validation succeeds.
 - A no-tool example is incorrectly assigned a tool call.
 - A tool-required example is incorrectly treated as no-tool.
 - Audio transcription changes a number, language-specific unit word, decimal separator, or source/target direction.
@@ -117,14 +123,14 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - **FR-005**: The system MUST emit structured JSON for tool-use decisions and tool invocations.
 - **FR-006**: Every model tool-decision output MUST use one JSON envelope containing `needs_tool`, `tool_call`, and `final_answer`.
 - **FR-007**: For no-tool outputs, `tool_call` MUST be null.
-- **FR-008**: For tool-required outputs, `tool_call` MUST contain `tool: "units.convert"` and `arguments` with numeric `value`, `from_unit`, and `to_unit`.
+- **FR-008**: For tool-required MVP dataset outputs, `tool_call` MUST contain `tool: "units.convert"` and `arguments` with numeric `value`, `from_unit`, and `to_unit`.
 - **FR-009**: Transcript-capable pipeline outputs MUST include `transcript` in the same JSON envelope.
 - **FR-010**: The system MUST include a tool schema for `units.convert`.
 - **FR-011**: The `units.convert` schema MUST support numeric values, source units, and target units.
 - **FR-012**: The `units.convert` tool MUST support meters, kilometers, centimeters, millimeters, grams, kilograms, pounds, ounces, Celsius, and Fahrenheit.
-- **FR-013**: The MVP MUST use `units.convert` as the main tool and MUST NOT require weather behavior.
+- **FR-013**: The MVP MUST include `units.convert` as the required initial tool provider and MUST NOT require weather behavior.
 - **FR-014**: The system MUST validate parsed JSON tool invocations before any execution.
-- **FR-015**: The system MUST reject unsupported tool names, missing arguments, nonnumeric values, and unsupported units before execution.
+- **FR-015**: The system MUST reject unknown tool names, missing arguments, nonnumeric values, and unsupported units before execution.
 - **FR-016**: The system MUST make one retry or repair attempt when the first model output is invalid JSON.
 - **FR-017**: The system MUST preserve whether a tool invocation was valid on the first pass or only after repair.
 - **FR-018**: Parsable Tool Invocation Rate MUST count only first-pass valid JSON envelopes.
@@ -161,17 +167,39 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - **FR-049**: The system MUST include a metrics report that identifies the best pipeline and explains failure cases.
 - **FR-050**: The system MUST include a demo notebook that demonstrates text input, audio input, JSON parsing and validation, optional tool execution, and final answers.
 - **FR-051**: The system SHOULD include an optional demo execution endpoint for sending requests and receiving parsed outputs, execution results, and answers.
+- **FR-052**: The system MUST support adding new tools without requiring changes to model pipeline implementations.
+- **FR-053**: Every executable tool MUST implement a common `ToolProvider` interface.
+- **FR-053a**: The common tool interface MUST include a `ToolCall` model representing a resolved tool name and raw argument payload before validation.
+- **FR-053b**: The common tool interface MUST include a `ToolResult` model representing successful tool output or structured execution failure metadata.
+- **FR-053c**: The common tool interface MUST include a tool manifest builder that exports registered tool names, descriptions, and JSON Schemas for prompting.
+- **FR-054**: Every `ToolProvider` MUST expose a unique tool name.
+- **FR-055**: Every `ToolProvider` MUST expose a human-readable description suitable for prompt and report surfaces.
+- **FR-056**: Every `ToolProvider` MUST expose a Pydantic argument schema for validating tool arguments.
+- **FR-057**: Every `ToolProvider` MUST expose a deterministic execute method for validated arguments.
+- **FR-058**: Every `ToolProvider` MUST export JSON Schema for prompt construction and validation.
+- **FR-059**: The pipeline runner MUST discover, validate, and execute tool calls only through `ToolRegistry` and `ToolExecutor`.
+- **FR-060**: The system MUST reject duplicate tool provider names before benchmark execution begins.
+- **FR-061**: Unknown tool names MUST be recorded as structured failures and MUST NOT be executed.
+- **FR-062**: Invalid tool arguments MUST be recorded as structured failures and MUST NOT be executed.
+- **FR-063**: Tool execution errors MUST be recorded as structured failures without stopping unrelated benchmark examples.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Benchmark Example**: A generated semantic request with language, reference text, expected tool decision, expected tool invocation when applicable, expected answer, split, and stable ID.
 - **Audio Example**: A synthesized audio version of a benchmark example linked to the same stable ID, language, reference transcript, and split.
-- **Tool Invocation**: A structured request naming `units.convert` with numeric value, source unit, and target unit.
+- **Tool Provider**: A registered executable tool plugin with a unique name, description, argument schema, deterministic execution behavior, and JSON Schema export.
+- **Tool Registry**: The catalog of available tool providers used to resolve tool names, export prompt schemas, validate arguments, and reject unknown or duplicate tools.
+- **Tool Executor**: The execution boundary that invokes a registered tool provider only after registry lookup and argument validation succeed.
+- **Tool Call**: A structured request naming a registered tool and providing raw arguments to validate against that tool provider's argument schema; MVP benchmark expectations use `units.convert` with numeric value, source unit, and target unit.
+- **Tool Result**: A structured result from `ToolExecutor`, containing either provider output or structured execution failure details.
+- **Tool Manifest**: A prompt-facing description of one registered tool, including unique name, human-readable description, and argument JSON Schema.
+- **Tool Manifest Builder**: The registry-backed component that builds model prompt tool manifests only from registered providers.
 - **Model Output Envelope**: A structured JSON object containing `needs_tool`, `tool_call`, and `final_answer`, plus `transcript` for transcript-capable pipelines.
 - **Pipeline Output**: The recorded result from one pipeline for one example, including raw output, parsed JSON envelope when available, first-pass parsability, repair-success status, validation status, transcript when available, optional execution result, final answer, and error details.
 - **Metric Result**: Aggregated measurements for one pipeline and dataset subset, including tool-use metrics, WER, and modality-gap comparisons.
 - **Tool Decision Confusion Matrix**: A count of true positives, false positives, true negatives, and false negatives based on expected and observed `needs_tool` behavior, where false positives include no-tool false alarms.
-- **Failure Case**: A recorded example where the output differs from expectation, categorized by JSON parsing, schema validation, tool decision, tool name, numeric value, source unit, target unit, transcript, execution, or answer error.
+- **Structured Tool Failure**: A machine-readable failure record for unknown tool names, invalid arguments, duplicate providers, or execution errors.
+- **Failure Case**: A recorded example where the output differs from expectation, categorized by JSON parsing, schema validation, unknown tool, duplicate tool provider, invalid tool arguments, tool decision, tool name, numeric value, source unit, target unit, transcript, execution, or answer error.
 - **Demo Request**: A text or audio request submitted through the notebook or optional demo endpoint with returned decision, parsed output, execution result, and answer.
 
 ### Benchmark and Dataset Requirements *(mandatory for benchmark changes)*
@@ -180,9 +208,9 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - **Split Strategy**: Dataset examples are assigned to deterministic 70/15/15 train, validation, and test splits stratified by language, tool/no-tool label, and unit family.
 - **Languages**: Russian and English are balanced at 120 text examples each; each language includes 15% no-tool examples.
 - **Modalities**: Text and synthesized audio examples must remain aligned through shared semantic IDs.
-- **Allowed Tools**: `units.convert` is the only required MVP tool; weather is out of scope.
+- **Allowed Tools**: `units.convert` is the only required MVP tool provider; additional tools may be added only through the unified provider registry; weather is out of scope.
 - **Artifact Logging**: Each run records inputs, raw outputs, parsed outputs, validation errors, repair attempts, optional execution results, answers, and metrics.
-- **Failure Handling**: Invalid first-pass JSON, failed repair, schema validation errors, unsupported tool calls, incorrect tool decisions, partially correct arguments, transcript errors, and optional execution failures are recorded explicitly; repaired JSON is distinguishable from first-pass valid JSON.
+- **Failure Handling**: Invalid first-pass JSON, failed repair, schema validation errors, unknown tool calls, invalid tool arguments, duplicate tool providers, incorrect tool decisions, partially correct arguments, transcript errors, and optional execution failures are recorded explicitly; repaired JSON is distinguishable from first-pass valid JSON.
 - **CI Evidence**: Normal validation must be able to run a bounded smoke benchmark without relying on large generated artifacts or unavailable external resources.
 - **Full Benchmark Trigger**: Full audio/model benchmark runs may be performed separately from bounded validation runs when they require heavier resources.
 
@@ -199,6 +227,8 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - **SC-007**: The benchmark report includes dataset summary, per-pipeline metrics, language-specific metric splits, tool/no-tool confusion matrix, WER, modality gap, best-pipeline rationale, and categorized failure cases.
 - **SC-008**: Invalid first-pass JSON receives no more than one retry or repair attempt, and the report distinguishes first-pass valid JSON from repaired JSON.
 - **SC-009**: The demo notebook shows at least one Russian and one English example for text input, audio transcription, audio tool calling, optional execution, and final answer display.
+- **SC-010**: A new deterministic test tool can be registered, included in exported prompt schemas, validated, executed, and failure-logged without changing any Pipeline A-D implementation.
+- **SC-011**: Unknown tools, invalid tool arguments, duplicate provider names, and execution errors each produce structured failure records in benchmark artifacts.
 
 ## Assumptions
 
@@ -208,3 +238,4 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - Synthesized audio quality is sufficient for repeatable benchmarking, while full natural-speech robustness can be evaluated later.
 - Optional backend execution can be disabled for dry-run evaluation, but parsing and validation still run.
 - The optional demo endpoint is secondary to the benchmark runner, metrics report, and demo notebook.
+- Tool plugins are deterministic local providers for benchmark reproducibility; non-deterministic or remote tools are out of scope for MVP evaluation.

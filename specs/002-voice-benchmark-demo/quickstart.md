@@ -50,7 +50,9 @@ Expected result:
 - parsed envelopes saved when valid
 - validation errors saved when invalid
 - repair attempts and repair success recorded
-- optional tool execution results recorded for valid `units.convert` calls
+- registered tool manifests built for prompts and validation
+- optional tool execution results recorded only through `ToolRegistry` and `ToolExecutor`
+- structured failures recorded for unknown tools, invalid arguments, and execution errors
 - per-pipeline metrics summaries written as CSV or Parquet
 
 ## Build Report
@@ -81,7 +83,9 @@ python -m mypy
 
 Required coverage areas:
 
-- `units.convert` schema validation and executor behavior
+- `ToolProvider`, `ToolRegistry`, and `ToolExecutor` behavior
+- registry-backed tool manifest builder behavior
+- `units.convert` provider schema validation and executor behavior
 - JSON parsing and single repair attempt
 - dataset generation, balancing, and splits
 - TTS metadata generation
