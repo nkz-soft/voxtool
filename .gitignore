@@ -218,9 +218,12 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Generated benchmark artifacts
+data/generated/
 data/raw/**
 data/processed/**
 data/fixtures/generated/**
+runs/
+reports/*.md
 reports/**
 artifacts/
 outputs/
@@ -236,8 +239,10 @@ audio-generated/
 *.jsonl.gz
 
 # Model and experiment stores
-models/
-model-files/
+/models/
+/model-files/
+*.bin
+*.gguf
 checkpoints/
 *.ckpt
 *.pt
