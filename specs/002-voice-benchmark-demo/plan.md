@@ -16,7 +16,7 @@ Build a Python 3.11+ benchmark and demo system for Russian/English voice assista
 
 **Storage**: Local filesystem artifacts. JSONL is the primary dataset and per-example run format; Parquet or CSV is used for metrics summaries; markdown is used for final reports; generated audio and benchmark outputs stay outside Git except small fixtures.
 
-**Testing**: pytest for unit, integration, and smoke/e2e tests; ruff for linting and formatting checks
+**Testing**: pytest for unit, integration, and smoke/e2e tests; ruff for linting and formatting checks; mypy after implementation for typecheck evidence
 
 **Target Platform**: Local developer machines and CI runners without required GPU, cloud services, paid APIs, or large model downloads for MVP validation
 
@@ -41,10 +41,10 @@ Build a Python 3.11+ benchmark and demo system for Russian/English voice assista
 - **Experiment artifacts**: PASS. Runs save inputs, raw outputs, parsed outputs, validation errors, repair attempts, execution results, answers, per-example metrics, and aggregate summaries.
 - **Modular boundary**: PASS. Package boundaries are fixed for tool schema, dataset builder, TTS, model runner, pipeline runner, ASR eval, metrics, and report builder.
 - **Required tests**: PASS. Plan includes tests for schema validation, parser repair, metrics, ASR normalization/WER, dataset generation, and pipeline orchestration.
-- **CI coverage**: PASS. PR CI will run ruff checks, pytest, and a deterministic smoke benchmark using `MockModelAdapter`.
+- **CI coverage**: PASS. PR CI will run ruff checks, mypy, pytest, and a deterministic smoke benchmark using `MockModelAdapter`.
 - **Full benchmarks**: PASS. Gemma3n and real ASR/model runs are manual experiments and do not block normal CI.
 - **Git hygiene**: PASS. Large generated artifacts are ignored; CI/full-run outputs are retained as external workflow or local artifacts rather than committed.
-- **PR evidence**: PASS. PR evidence will include task IDs, ruff/pytest output, smoke benchmark metrics, and relevant generated report paths.
+- **PR evidence**: PASS. PR evidence will include task IDs, ruff/mypy/pytest output, smoke benchmark metrics, and relevant generated report paths.
 
 ## Project Structure
 

@@ -22,6 +22,7 @@ dev = [
     "pytest>=8.3.0",
     "pytest-cov>=7.1.0",
     "ruff>=0.6.0",
+    "types-jsonschema>=4.25.1",
 ]
 
 [tool.ruff]
@@ -39,7 +40,6 @@ indent-style = "space"
 [tool.mypy]
 python_version = "3.11"
 strict = true
-mypy_path = ["apps", "packages"]
 files = ["apps", "packages", "scripts", "tests"]
 
 [tool.pytest.ini_options]

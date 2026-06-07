@@ -39,17 +39,17 @@
 
 ### Tests First
 
-- [ ] T011 [P] Create failing Pydantic model and JSON Schema validation tests for valid and invalid model envelopes in `tests/unit/test_tool_schema.py`
-- [ ] T012 [P] Create failing `units.convert` executor tests for length, mass, temperature, incompatible family, and unsupported unit cases in `tests/unit/test_units_executor.py`
-- [ ] T013 [P] Create failing JSON Schema contract compatibility test using `specs/002-voice-benchmark-demo/contracts/model-output.schema.json` in `tests/unit/test_model_output_schema_contract.py`
+- [X] T011 [P] Create failing Pydantic model and JSON Schema validation tests for valid and invalid model envelopes in `tests/unit/test_tool_schema.py`
+- [X] T012 [P] Create failing `units.convert` executor tests for length, mass, temperature, incompatible family, and unsupported unit cases in `tests/unit/test_units_executor.py`
+- [X] T013 [P] Create failing JSON Schema contract compatibility test using `specs/002-voice-benchmark-demo/contracts/model-output.schema.json` in `tests/unit/test_model_output_schema_contract.py`
 
 ### Implementation
 
-- [ ] T014 Implement unit enums, `ToolInvocation`, `ModelOutputEnvelope`, and validation error models in `packages/tool_schema/models.py`
-- [ ] T015 Implement strict JSON Schema loading and validation helpers in `packages/tool_schema/json_schema.py`
-- [ ] T016 Implement deterministic `units.convert` executor with compatible-family checks in `packages/tool_schema/executor.py`
-- [ ] T017 Export tool schema and executor APIs from `packages/tool_schema/__init__.py`
-- [ ] T018 Add checked-in tool schema copy for runtime/config consumers in `configs/tools/model-output.schema.json`
+- [X] T014 Implement unit enums, `ToolInvocation`, `ModelOutputEnvelope`, and validation error models in `packages/tool_schema/models.py`
+- [X] T015 Implement strict JSON Schema loading and validation helpers in `packages/tool_schema/json_schema.py`
+- [X] T016 Implement deterministic `units.convert` executor with compatible-family checks in `packages/tool_schema/executor.py`
+- [X] T017 Export tool schema and executor APIs from `packages/tool_schema/__init__.py`
+- [X] T018 Add checked-in tool schema copy for runtime/config consumers in `configs/tools/model-output.schema.json`
 
 **Checkpoint**: Tool calls can be parsed, validated, rejected, and executed deterministically without any model or pipeline code.
 

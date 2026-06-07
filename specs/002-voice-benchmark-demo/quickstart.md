@@ -76,6 +76,7 @@ Expected report contents:
 python -m pytest
 python -m ruff check .
 python -m ruff format --check .
+python -m mypy
 ```
 
 Required coverage areas:
@@ -106,6 +107,7 @@ Include:
 
 - linked Speckit task IDs
 - ruff output
+- mypy output
 - pytest output
 - deterministic smoke benchmark command and artifact path
 - generated report path or summary
