@@ -42,11 +42,11 @@
 - [X] T011 [P] Create failing Pydantic model and JSON Schema validation tests for valid and invalid model envelopes in `tests/unit/test_tool_schema.py`
 - [X] T012 [P] Create failing `units.convert` executor tests for length, mass, temperature, incompatible family, and unsupported unit cases in `tests/unit/test_units_executor.py`
 - [X] T013 [P] Create failing JSON Schema contract compatibility test using `specs/002-voice-benchmark-demo/contracts/model-output.schema.json` in `tests/unit/test_model_output_schema_contract.py`
-- [ ] T013a [P] Create failing `ToolProvider` interface and JSON Schema export tests in `tests/unit/test_tool_provider.py`
-- [ ] T013b [P] Create failing `ToolRegistry` tests for provider lookup, prompt schema export, unknown tool failures, and duplicate provider names in `tests/unit/test_tool_registry.py`
-- [ ] T013c [P] Create failing `ToolExecutor` tests for valid execution, invalid argument failures, and provider execution errors in `tests/unit/test_tool_executor.py`
-- [ ] T013d [P] Create failing `ToolCall`, `ToolResult`, and tool manifest builder tests in `tests/unit/test_tool_manifest.py`
-- [ ] T013e [P] Create failing pipeline import-boundary test proving `packages/pipeline_runner` does not import concrete tool providers in `tests/unit/test_pipeline_tool_boundaries.py`
+- [X] T013a [P] Create failing `ToolProvider` interface and JSON Schema export tests in `tests/unit/test_tool_provider.py`
+- [X] T013b [P] Create failing `ToolRegistry` tests for provider lookup, prompt schema export, unknown tool failures, and duplicate provider names in `tests/unit/test_tool_registry.py`
+- [X] T013c [P] Create failing `ToolExecutor` tests for valid execution, invalid argument failures, and provider execution errors in `tests/unit/test_tool_executor.py`
+- [X] T013d [P] Create failing `ToolCall`, `ToolResult`, and tool manifest builder tests in `tests/unit/test_tool_manifest.py`
+- [X] T013e [P] Create failing pipeline import-boundary test proving `packages/pipeline_runner` does not import concrete tool providers in `tests/unit/test_pipeline_tool_boundaries.py`
 
 ### Implementation
 
@@ -55,11 +55,11 @@
 - [X] T016 Implement deterministic `units.convert` executor with compatible-family checks in `packages/tool_schema/executor.py`
 - [X] T017 Export tool schema and executor APIs from `packages/tool_schema/__init__.py`
 - [X] T018 Add checked-in tool schema copy for runtime/config consumers in `configs/tools/model-output.schema.json`
-- [ ] T018a Implement `ToolProvider`, `ToolRegistry`, `ToolExecutor`, and structured tool failure models in `packages/tool_schema/providers.py`
-- [ ] T018b Adapt `units.convert` into a `ToolProvider` with Pydantic argument schema and JSON Schema export in `packages/tool_schema/units.py`
-- [ ] T018c Export registered tool prompt/validation schemas from `packages/tool_schema/json_schema.py` and `configs/tools/model-output.schema.json`
-- [ ] T018d Export provider registry and executor APIs from `packages/tool_schema/__init__.py`
-- [ ] T018e Implement `ToolCall`, `ToolResult`, `ToolManifest`, and registry-backed manifest builder in `packages/tool_schema/providers.py`
+- [X] T018a Implement `ToolProvider`, `ToolRegistry`, `ToolExecutor`, and structured tool failure models in `packages/tool_schema/providers.py`
+- [X] T018b Adapt `units.convert` into a `ToolProvider` with Pydantic argument schema and JSON Schema export in `packages/tool_schema/units.py`
+- [X] T018c Export registered tool prompt/validation schemas from `packages/tool_schema/json_schema.py` and `configs/tools/model-output.schema.json`
+- [X] T018d Export provider registry and executor APIs from `packages/tool_schema/__init__.py`
+- [X] T018e Implement `ToolCall`, `ToolResult`, `ToolManifest`, and registry-backed manifest builder in `packages/tool_schema/providers.py`
 
 **Checkpoint**: Tool calls can be parsed, resolved, validated, rejected, and executed deterministically through the registry/executor boundary without any pipeline knowing concrete tool implementations.
 

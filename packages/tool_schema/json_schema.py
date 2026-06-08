@@ -5,6 +5,9 @@ from typing import Any, cast
 
 from jsonschema import Draft202012Validator
 
+from packages.tool_schema.providers import ToolRegistry
+from packages.tool_schema.units import default_tool_registry
+
 DEFAULT_SCHEMA_PATH = (
     Path(__file__).resolve().parents[2]
     / "configs"
@@ -36,3 +39,10 @@ def validate_model_output(
             for error in errors
         ]
         raise ValueError("; ".join(messages))
+
+
+def build_registered_tool_prompt_schema(
+    registry: ToolRegistry | None = None,
+) -> dict[str, Any]:
+    active_registry = registry if registry is not None else default_tool_registry()
+    return active_registry.prompt_schema()
