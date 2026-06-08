@@ -1,7 +1,7 @@
 # VoxTool
 
-[![CI](https://github.com/nickspring/voxtool/actions/workflows/ci.yml/badge.svg)](https://github.com/nickspring/voxtool/actions/workflows/ci.yml)
-[![Benchmark Smoke](https://github.com/nickspring/voxtool/actions/workflows/benchmark-smoke.yml/badge.svg)](https://github.com/nickspring/voxtool/actions/workflows/benchmark-smoke.yml)
+[![CI](https://github.com/nkz-soft/voxtool/actions/workflows/ci.yml/badge.svg)](https://github.com/nkz-soft/voxtool/actions/workflows/ci.yml)
+[![Benchmark Smoke](https://github.com/nkz-soft/voxtool/actions/workflows/benchmark-smoke.yml/badge.svg)](https://github.com/nkz-soft/voxtool/actions/workflows/benchmark-smoke.yml)
 
 VoxTool is a multilingual voice assistant benchmark and demo scaffold. The MVP
 focuses on reproducible text/audio tool-use evaluation for `units.convert` with
