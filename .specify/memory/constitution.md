@@ -1,14 +1,14 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 -> 1.1.0
+Version change: 1.1.0 -> 1.2.0
 Modified principles:
 - I. Benchmark-First Evaluation: unchanged
 - II. Validated Tool Invocation: unchanged
 - III. Machine-Readable Model Output: unchanged
 - IV. Versioned Multilingual Datasets: unchanged
-- V. Experiment Traceability and Modular Design: expanded with CI and artifact rules
+- V. Experiment Traceability and Modular Design: expanded with public API documentation rules
 Added sections:
-- CI, Artifacts, and Pull Requests
+- None
 Removed sections:
 - None
 Templates requiring updates:
@@ -16,6 +16,7 @@ Templates requiring updates:
 - .specify/templates/spec-template.md: updated
 - .specify/templates/tasks-template.md: updated
 - .specify/templates/commands/*.md: not present
+- README.md: updated
 Follow-up TODOs: none
 -->
 # Voice Assistant ToolBench Constitution
@@ -57,7 +58,9 @@ modules with clear interfaces. Tests are REQUIRED for schema validation, parser
 repair, metrics, and pipeline orchestration because these components define the
 trust boundary of the benchmark. Large generated artifacts MUST NOT be committed
 to Git; reproducible generation steps and bounded metadata belong in the
-repository instead.
+repository instead. Public functions and methods MUST have concise descriptions
+when they are exported from a package, used across module boundaries, exposed
+through CLI/API/notebook surfaces, or encode benchmark-critical behavior.
 
 ## Tool and Modality Constraints
 
@@ -84,6 +87,13 @@ Task plans MUST include tests for schema validation, parser repair, metrics, and
 pipeline orchestration whenever those components are changed. A feature is not
 complete until tests pass and a reproducible benchmark or validation command
 produces the required saved artifacts.
+
+Public modules, classes, functions, and methods MUST be described when they are
+part of a package interface, command surface, API route, notebook helper, or
+benchmark-critical implementation. Descriptions MUST state purpose, important
+inputs or outputs, and failure behavior when that behavior is not obvious from
+the signature. Private helpers MAY remain undocumented when their name and local
+context are sufficient.
 
 ## CI, Artifacts, and Pull Requests
 
@@ -116,4 +126,4 @@ listed in the plan's Complexity Tracking table with a concrete rationale and a
 rejected simpler alternative. Unresolved violations block implementation
 completion and pull request merge.
 
-**Version**: 1.1.0 | **Ratified**: 2026-06-05 | **Last Amended**: 2026-06-05
+**Version**: 1.2.0 | **Ratified**: 2026-06-05 | **Last Amended**: 2026-06-09

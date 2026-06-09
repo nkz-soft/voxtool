@@ -4,7 +4,10 @@ from pathlib import Path
 
 import typer
 
+from apps.cli import dataset
+
 app = typer.Typer(help="VoxTool benchmark and demo CLI.")
+app.add_typer(dataset.app, name="dataset")
 
 
 @app.command()

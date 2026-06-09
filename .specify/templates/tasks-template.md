@@ -78,6 +78,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T013 Configure CI jobs for lint, formatting check, typecheck, tests, and smoke benchmark
 - [ ] T014 Configure GitHub Actions artifact upload with limited retention for benchmark outputs
 - [ ] T015 Document manual or self-hosted GPU trigger for full audio/model benchmarks
+- [ ] T016 Document public package, CLI, API, notebook, and benchmark-critical functions or methods
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -93,19 +94,20 @@ Examples of foundational tasks (adjust based on your project):
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T016 [P] [US1] Schema validation test for [tool/output] in tests/unit/test_[name].py
-- [ ] T017 [P] [US1] Parser repair test for invalid JSON handling in tests/unit/test_[name].py
-- [ ] T018 [P] [US1] Metrics test for [benchmark metric] in tests/unit/test_[name].py
-- [ ] T019 [P] [US1] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
+- [ ] T017 [P] [US1] Schema validation test for [tool/output] in tests/unit/test_[name].py
+- [ ] T018 [P] [US1] Parser repair test for invalid JSON handling in tests/unit/test_[name].py
+- [ ] T019 [P] [US1] Metrics test for [benchmark metric] in tests/unit/test_[name].py
+- [ ] T020 [P] [US1] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 1
 
-- [ ] T020 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T021 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T022 [US1] Implement [Service] in src/services/[service].py (depends on T020, T021)
-- [ ] T023 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T024 [US1] Add schema validation and JSON failure handling
-- [ ] T025 [US1] Add experiment artifact logging for user story 1 operations
+- [ ] T021 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T022 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T023 [US1] Implement [Service] in src/services/[service].py (depends on T021, T022)
+- [ ] T024 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T025 [US1] Add schema validation and JSON failure handling
+- [ ] T026 [US1] Add experiment artifact logging for user story 1 operations
+- [ ] T027 [US1] Add descriptions for public functions, methods, and command/API surfaces
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -119,17 +121,18 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 2 (REQUIRED when touched by this story) ⚠️
 
-- [ ] T026 [P] [US2] Schema validation test for [tool/output] in tests/unit/test_[name].py
-- [ ] T027 [P] [US2] Parser repair or invalid JSON handling test in tests/unit/test_[name].py
-- [ ] T028 [P] [US2] Metrics test for [benchmark metric] in tests/unit/test_[name].py
-- [ ] T029 [P] [US2] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
+- [ ] T028 [P] [US2] Schema validation test for [tool/output] in tests/unit/test_[name].py
+- [ ] T029 [P] [US2] Parser repair or invalid JSON handling test in tests/unit/test_[name].py
+- [ ] T030 [P] [US2] Metrics test for [benchmark metric] in tests/unit/test_[name].py
+- [ ] T031 [P] [US2] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 2
 
-- [ ] T030 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T031 [US2] Implement [Service] in src/services/[service].py
-- [ ] T032 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T033 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T032 [P] [US2] Create [Entity] model in src/models/[entity].py
+- [ ] T033 [US2] Implement [Service] in src/services/[service].py
+- [ ] T034 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T035 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T036 [US2] Add descriptions for public functions, methods, and command/API surfaces
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -143,15 +146,16 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 3 (REQUIRED when touched by this story) ⚠️
 
-- [ ] T034 [P] [US3] Schema validation test for [tool/output] in tests/unit/test_[name].py
-- [ ] T035 [P] [US3] Metrics test for [benchmark metric] in tests/unit/test_[name].py
-- [ ] T036 [P] [US3] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
+- [ ] T037 [P] [US3] Schema validation test for [tool/output] in tests/unit/test_[name].py
+- [ ] T038 [P] [US3] Metrics test for [benchmark metric] in tests/unit/test_[name].py
+- [ ] T039 [P] [US3] Pipeline orchestration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 3
 
-- [ ] T037 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T038 [US3] Implement [Service] in src/services/[service].py
-- [ ] T039 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T040 [P] [US3] Create [Entity] model in src/models/[entity].py
+- [ ] T041 [US3] Implement [Service] in src/services/[service].py
+- [ ] T042 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T043 [US3] Add descriptions for public functions, methods, and command/API surfaces
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -167,6 +171,7 @@ Examples of foundational tasks (adjust based on your project):
 
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
+- [ ] TXXX Public function and method description review
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests required by changed benchmark components in tests/unit/
 - [ ] TXXX Security hardening
