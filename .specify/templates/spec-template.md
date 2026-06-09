@@ -104,11 +104,12 @@
 - **FR-015**: System MUST NOT commit large generated artifacts to Git
 - **FR-016**: System MUST upload CI benchmark outputs as GitHub Actions artifacts with limited retention
 - **FR-017**: Pull requests MUST link to a spec task and include validation evidence
+- **FR-018**: Public functions, methods, modules, CLI commands, API routes, and notebook helpers MUST be described when they are part of a package interface or benchmark-critical behavior
 
 *Example of marking unclear requirements:*
 
-- **FR-018**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-019**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-019**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-020**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 

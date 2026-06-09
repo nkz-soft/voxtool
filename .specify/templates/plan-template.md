@@ -59,6 +59,9 @@
   generation, TTS, model runner, pipeline runner, metrics, and reports.
 - **Required tests**: Plan includes tests for schema validation, parser repair,
   metrics, and pipeline orchestration when those areas change.
+- **Public API documentation**: Plan identifies public functions, methods,
+  modules, CLI commands, API routes, and notebook helpers that require concise
+  descriptions.
 - **CI coverage**: Plan confirms PR CI will run lint, formatting check,
   typecheck, tests, and a smoke benchmark.
 - **Full benchmarks**: Plan identifies whether full audio/model benchmarks are

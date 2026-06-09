@@ -45,6 +45,10 @@ with a 30-example limit and writes artifacts under `reports/smoke`.
 Pull requests should include Spec Kit task IDs plus validation evidence for CI,
 smoke benchmark results, artifacts, and any known deviations.
 
+Public package interfaces, CLI commands, API routes, notebook helpers, and
+benchmark-critical functions or methods must include concise descriptions of
+their purpose, important inputs or outputs, and non-obvious failure behavior.
+
 ## Artifact Policy
 
 Generated audio, evaluation results, benchmark reports, model files,

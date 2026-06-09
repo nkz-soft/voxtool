@@ -73,19 +73,19 @@
 
 ### Tests First
 
-- [ ] T019 [P] [US1] Create failing dataset balance and expected-field tests in `tests/unit/test_dataset_builder.py`
-- [ ] T020 [P] [US1] Create failing deterministic split generation tests stratified by language, tool/no-tool label, and unit family in `tests/unit/test_dataset_splits.py`
-- [ ] T021 [P] [US1] Create failing dataset CLI contract test for `voxtool dataset generate` behavior in `tests/integration/test_generate_dataset_cli.py`
+- [X] T019 [P] [US1] Create failing dataset balance and expected-field tests in `tests/unit/test_dataset_builder.py`
+- [X] T020 [P] [US1] Create failing deterministic split generation tests stratified by language, tool/no-tool label, and unit family in `tests/unit/test_dataset_splits.py`
+- [X] T021 [P] [US1] Create failing dataset CLI contract test for `voxtool dataset generate` behavior in `tests/integration/test_generate_dataset_cli.py`
 
 ### Implementation
 
-- [ ] T022 [P] [US1] Implement dataset record models for `BenchmarkExample` and generation metadata in `packages/dataset_builder/models.py`
-- [ ] T023 [US1] Implement deterministic unit-conversion and no-tool template generation in `packages/dataset_builder/generator.py`
-- [ ] T024 [US1] Implement deterministic 70/15/15 stratified split assignment in `packages/dataset_builder/splits.py`
-- [ ] T025 [US1] Implement JSONL read/write helpers for dataset records in `packages/dataset_builder/io.py`
-- [ ] T026 [US1] Implement dataset generation CLI command in `apps/cli/dataset.py`
-- [ ] T027 [US1] Wire dataset script entrypoint to CLI command in `scripts/generate_dataset.py`
-- [ ] T028 [US1] Add small deterministic dataset fixture for tests in `data/fixtures/examples.small.jsonl`
+- [X] T022 [P] [US1] Implement dataset record models for `BenchmarkExample` and generation metadata in `packages/dataset_builder/models.py`
+- [X] T023 [US1] Implement deterministic unit-conversion and no-tool template generation in `packages/dataset_builder/generator.py`
+- [X] T024 [US1] Implement deterministic 70/15/15 stratified split assignment in `packages/dataset_builder/splits.py`
+- [X] T025 [US1] Implement JSONL read/write helpers for dataset records in `packages/dataset_builder/io.py`
+- [X] T026 [US1] Implement dataset generation CLI command in `apps/cli/dataset.py`
+- [X] T027 [US1] Wire dataset script entrypoint to CLI command in `scripts/generate_dataset.py`
+- [X] T028 [US1] Add small deterministic dataset fixture for tests in `data/fixtures/examples.small.jsonl`
 
 **Checkpoint**: Pipeline A can be tested against a deterministic generated text dataset before audio support exists.
 
