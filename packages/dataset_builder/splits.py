@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+import random
 from collections import defaultdict
 from collections.abc import Hashable, Sequence
 from typing import TypeVar
-
-from sklearn.model_selection import train_test_split  # type: ignore[import-untyped]
 
 from packages.dataset_builder.models import Split
 
@@ -24,7 +23,7 @@ def assign_stratified_splits(
     items: Sequence[T],
     strata: Sequence[Hashable],
 ) -> list[tuple[T, Split]]:
-    """Assign train/validation/test labels with sklearn within each stratum.
+    """Assign train/validation/test labels deterministically within each stratum.
 
     The returned list preserves the input item order. Raises ValueError when the
     item and stratum sequences do not have matching lengths.
@@ -46,20 +45,14 @@ def assign_stratified_splits(
 
 def _split_group(items: Sequence[T]) -> list[tuple[T, Split]]:
     counts = split_counts(len(items))
-    train_items, temp_items = train_test_split(
-        list(items),
-        train_size=counts["train"],
-        test_size=counts["validation"] + counts["test"],
-        random_state=RANDOM_STATE,
-        shuffle=True,
-    )
-    validation_items, test_items = train_test_split(
-        temp_items,
-        train_size=counts["validation"],
-        test_size=counts["test"],
-        random_state=RANDOM_STATE,
-        shuffle=True,
-    )
+    shuffled = list(items)
+    random.Random(RANDOM_STATE).shuffle(shuffled)
+
+    train_end = counts["train"]
+    validation_end = train_end + counts["validation"]
+    train_items = shuffled[:train_end]
+    validation_items = shuffled[train_end:validation_end]
+    test_items = shuffled[validation_end:]
 
     assigned: list[tuple[T, Split]] = []
     assigned.extend((item, "train") for item in train_items)

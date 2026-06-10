@@ -1,30 +1,40 @@
 from __future__ import annotations
 
 import argparse
-import json
+import sys
 from pathlib import Path
+from typing import Literal, cast
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run deterministic smoke benchmark.")
-    parser.add_argument("--config", required=True)
+    """Parse script arguments and run the benchmark dispatcher."""
+    from packages.pipeline_runner.runner import run_benchmark
+    from packages.tool_schema.providers import ToolExecutor
+    from packages.tool_schema.units import default_tool_registry
+
+    parser = argparse.ArgumentParser(description="Run Pipeline A text benchmark.")
+    parser.add_argument("--dataset", required=True)
+    parser.add_argument("--pipeline", default="A")
+    parser.add_argument("--run-id", required=True)
     parser.add_argument("--model", default="mock")
-    parser.add_argument("--limit", type=int, default=30)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
 
-    output = Path(args.output)
-    output.mkdir(parents=True, exist_ok=True)
-    metrics = {
-        "config": args.config,
-        "model": args.model,
-        "limit": args.limit,
-        "pipelines": ["A", "B", "C", "D"],
-        "examples_evaluated": 0,
-    }
-    (output / "metrics.json").write_text(
-        json.dumps(metrics, indent=2) + "\n",
-        encoding="utf-8",
+    registry = default_tool_registry()
+    run_benchmark(
+        pipeline=cast(Literal["A"], args.pipeline),
+        dataset_path=Path(args.dataset),
+        output_path=Path(args.output),
+        run_id=args.run_id,
+        registry=registry,
+        executor=ToolExecutor(registry),
+        model=cast(Literal["mock"], args.model),
+        limit=args.limit,
     )
 
 

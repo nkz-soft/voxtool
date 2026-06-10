@@ -182,6 +182,7 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - **FR-061**: Unknown tool names MUST be recorded as structured failures and MUST NOT be executed.
 - **FR-062**: Invalid tool arguments MUST be recorded as structured failures and MUST NOT be executed.
 - **FR-063**: Tool execution errors MUST be recorded as structured failures without stopping unrelated benchmark examples.
+- **FR-064**: Every public class, function, and method introduced by the implementation MUST include a concise explanatory docstring or equivalent public API comment.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -213,6 +214,7 @@ A reviewer opens the demo materials and final benchmark report to understand pip
 - **Failure Handling**: Invalid first-pass JSON, failed repair, schema validation errors, unknown tool calls, invalid tool arguments, duplicate tool providers, incorrect tool decisions, partially correct arguments, transcript errors, and optional execution failures are recorded explicitly; repaired JSON is distinguishable from first-pass valid JSON.
 - **CI Evidence**: Normal validation must be able to run a bounded smoke benchmark without relying on large generated artifacts or unavailable external resources.
 - **Full Benchmark Trigger**: Full audio/model benchmark runs may be performed separately from bounded validation runs when they require heavier resources.
+- **Public API Documentation**: Public classes, functions, and methods must be documented with concise docstrings or equivalent public API comments before a task is considered complete.
 
 ## Success Criteria *(mandatory)*
 
