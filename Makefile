@@ -14,4 +14,4 @@ test:
 	uv run pytest
 
 benchmark-smoke:
-	uv run python scripts/run_benchmark.py --config configs/experiments/smoke.yml --model mock --limit 30 --output reports/smoke
+	uv run python scripts/run_benchmark.py --dataset data/fixtures/examples.small.jsonl --pipeline A --run-id smoke --model mock --limit 30 --output reports/smoke/pipeline-a.jsonl

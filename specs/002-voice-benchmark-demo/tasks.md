@@ -6,6 +6,8 @@
 
 **Tests**: TDD is required where practical for tool schema validation, tool provider registry/executor behavior, `units.convert` provider behavior, JSON parser and repair, metric calculations, dataset split generation, and pipeline orchestration with mock models.
 
+**Documentation Rule**: Every public class, function, and method introduced by an implementation task must include a concise explanatory docstring or equivalent public API comment before that task is marked complete.
+
 **Organization**: Tasks are grouped by implementation phase, user story, and pipeline. Story labels map to the spec: US1 text unit conversion baseline, US2 audio transcription baseline, US3 one-pass audio tool calling, US4 cascaded audio tool calling, US5 benchmark report and demo review.
 
 ## Format: `[ID] [P?] [Story] Description`
@@ -125,20 +127,20 @@
 
 ### Tests First
 
-- [ ] T039 [P] [US1] Create failing `MockModelAdapter` tests for valid tool, no-tool, invalid JSON, repaired JSON, and invalid schema outputs in `tests/unit/test_mock_model_adapter.py`
-- [ ] T040 [P] [US1] Create failing Pipeline A orchestration test with mock examples and registry/executor-only tool calls in `tests/integration/test_pipeline_a.py`
-- [ ] T041 [P] [US1] Create failing artifact writer tests for raw output, parsed output, validation error, structured failures, and execution result JSONL records in `tests/unit/test_pipeline_artifacts.py`
+- [X] T039 [P] [US1] Create failing `MockModelAdapter` tests for valid tool, no-tool, invalid JSON, repaired JSON, and invalid schema outputs in `tests/unit/test_mock_model_adapter.py`
+- [X] T040 [P] [US1] Create failing Pipeline A orchestration test with mock examples and registry/executor-only tool calls in `tests/integration/test_pipeline_a.py`
+- [X] T041 [P] [US1] Create failing artifact writer tests for raw output, parsed output, validation error, structured failures, and execution result JSONL records in `tests/unit/test_pipeline_artifacts.py`
 
 ### Implementation
 
-- [ ] T042 [P] [US1] Define model adapter protocols and output types in `packages/model_runner/base.py`
-- [ ] T043 [US1] Implement deterministic `MockModelAdapter` in `packages/model_runner/mock.py`
-- [ ] T044 [P] [US1] Implement `TextLLMAdapter` placeholder interface for transcript-to-tool-call experiments in `packages/model_runner/text_llm.py`
-- [ ] T045 [US1] Implement shared pipeline artifact writer in `packages/pipeline_runner/artifacts.py`
-- [ ] T046 [US1] Implement Pipeline A orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_a.py`
-- [ ] T047 [US1] Implement benchmark runner dispatch for Pipeline A in `packages/pipeline_runner/runner.py`
-- [ ] T048 [US1] Implement benchmark CLI command for text pipeline execution in `apps/cli/benchmark.py`
-- [ ] T049 [US1] Wire benchmark script entrypoint in `scripts/run_benchmark.py`
+- [X] T042 [P] [US1] Define model adapter protocols and output types in `packages/model_runner/base.py`
+- [X] T043 [US1] Implement deterministic `MockModelAdapter` in `packages/model_runner/mock.py`
+- [X] T044 [P] [US1] Implement `TextLLMAdapter` placeholder interface for transcript-to-tool-call experiments in `packages/model_runner/text_llm.py`
+- [X] T045 [US1] Implement shared pipeline artifact writer in `packages/pipeline_runner/artifacts.py`
+- [X] T046 [US1] Implement Pipeline A orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_a.py`
+- [X] T047 [US1] Implement benchmark runner dispatch for Pipeline A in `packages/pipeline_runner/runner.py`
+- [X] T048 [US1] Implement benchmark CLI command for text pipeline execution in `apps/cli/benchmark.py`
+- [X] T049 [US1] Wire benchmark script entrypoint in `scripts/run_benchmark.py`
 
 **Checkpoint**: US1 MVP is independently functional for at least 200 text examples.
 
@@ -381,6 +383,10 @@ Task: T081 Create failing report builder contract test in tests/integration/test
 ### TDD Rule
 
 For tasks with a paired test and implementation path, complete the test task first and verify it fails for the expected reason before implementing the corresponding package, app, or script task.
+
+### Public API Documentation Rule
+
+Before marking an implementation task complete, confirm newly introduced public classes, functions, and methods have concise explanatory docstrings or equivalent public API comments.
 
 ### Non-Goals Guardrails
 
