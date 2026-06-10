@@ -85,9 +85,7 @@ def parse_model_output(
             first_pass_parsable=parse_result.first_pass_parsable,
             repair_attempted=parse_result.repair_attempted,
             repair_success=parse_result.repair_success,
-            validation_errors=[
-                error["msg"] for error in exc.errors(include_url=False)
-            ],
+            validation_errors=[error["msg"] for error in exc.errors(include_url=False)],
         )
 
     return ParserResult(
