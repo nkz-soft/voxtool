@@ -63,8 +63,10 @@ class MockModelAdapter:
         value = float(match.group("value"))
         if value.is_integer():
             value = int(value)
-        return value, _singular_unit(match.group("from_unit")), _singular_unit(
-            match.group("to_unit")
+        return (
+            value,
+            _singular_unit(match.group("from_unit")),
+            _singular_unit(match.group("to_unit")),
         )
 
     def _final_answer(self, value: float, from_unit: str, to_unit: str) -> str:
