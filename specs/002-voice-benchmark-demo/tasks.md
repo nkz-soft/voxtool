@@ -99,19 +99,19 @@
 
 ### Tests First
 
-- [ ] T029 [P] [US1] Create failing JSON parser tests for valid first-pass envelopes, invalid JSON, single repair success, and failed repair in `tests/unit/test_json_parser.py`
-- [ ] T030 [P] [US1] Create failing parser validation tests for no-tool envelope consistency, non-null false-alarm tool calls, unknown tools, and invalid tool arguments in `tests/unit/test_parser_validation.py`
-- [ ] T031 [P] [US1] Create failing prompt template tests proving tool prompts are built from registered tool manifests in `tests/unit/test_prompt_templates.py`
+- [X] T029 [P] [US1] Create failing JSON parser tests for valid first-pass envelopes, invalid JSON, single repair success, and failed repair in `tests/unit/test_json_parser.py`
+- [X] T030 [P] [US1] Create failing parser validation tests for no-tool envelope consistency, non-null false-alarm tool calls, unknown tools, and invalid tool arguments in `tests/unit/test_parser_validation.py`
+- [X] T031 [P] [US1] Create failing prompt template tests proving tool prompts are built from registered tool manifests in `tests/unit/test_prompt_templates.py`
 
 ### Implementation
 
-- [ ] T032 [US1] Implement parser result models and parser orchestration in `packages/tool_schema/parser.py`
-- [ ] T033 [US1] Implement single-attempt JSON repair strategy in `packages/tool_schema/repair.py`
-- [ ] T034 [US1] Add text tool-calling prompt template in `configs/prompts/pipeline_a_text_tool.md`
-- [ ] T035 [P] [US2] Add audio transcript prompt template in `configs/prompts/pipeline_b_transcript.md`
-- [ ] T036 [P] [US3] Add one-pass audio tool-calling prompt template in `configs/prompts/pipeline_c_audio_tool.md`
-- [ ] T037 [P] [US4] Add cascaded transcript-to-tool prompt template in `configs/prompts/pipeline_d_transcript_tool.md`
-- [ ] T038 [US1] Implement prompt loading and registry-backed tool manifest injection helpers in `packages/model_runner/prompts.py`
+- [X] T032 [US1] Implement parser result models and parser orchestration in `packages/tool_schema/parser.py`
+- [X] T033 [US1] Implement single-attempt JSON repair strategy in `packages/tool_schema/repair.py`
+- [X] T034 [US1] Add text tool-calling prompt template in `configs/prompts/pipeline_a_text_tool.md`
+- [X] T035 [P] [US2] Add audio transcript prompt template in `configs/prompts/pipeline_b_transcript.md`
+- [X] T036 [P] [US3] Add one-pass audio tool-calling prompt template in `configs/prompts/pipeline_c_audio_tool.md`
+- [X] T037 [P] [US4] Add cascaded transcript-to-tool prompt template in `configs/prompts/pipeline_d_transcript_tool.md`
+- [X] T038 [US1] Implement prompt loading and registry-backed tool manifest injection helpers in `packages/model_runner/prompts.py`
 
 **Checkpoint**: Model outputs can be parsed and validated consistently before any real pipeline is implemented.
 

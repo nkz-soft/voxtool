@@ -15,6 +15,7 @@ from packages.tool_schema.models import (
     Unit,
     UnitFamily,
 )
+from packages.tool_schema.parser import ParserResult, parse_model_output
 from packages.tool_schema.providers import (
     StructuredToolFailure,
     ToolCall,
@@ -24,10 +25,12 @@ from packages.tool_schema.providers import (
     ToolRegistry,
     ToolResult,
 )
+from packages.tool_schema.repair import repair_json_once
 from packages.tool_schema.units import UnitsConvertProvider, default_tool_registry
 
 __all__ = [
     "ModelOutputEnvelope",
+    "ParserResult",
     "StructuredToolFailure",
     "ToolArguments",
     "ToolCall",
@@ -47,5 +50,7 @@ __all__ = [
     "default_tool_registry",
     "execute_units_convert",
     "load_model_output_schema",
+    "parse_model_output",
+    "repair_json_once",
     "validate_model_output",
 ]
