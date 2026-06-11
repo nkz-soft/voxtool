@@ -154,18 +154,18 @@
 
 ### Tests First
 
-- [ ] T050 [P] [US2] Create failing audio metadata model and JSONL tests in `tests/unit/test_audio_metadata.py`
-- [ ] T051 [P] [US2] Create failing TTS synthesis adapter tests using a deterministic local/silent fixture synthesizer in `tests/unit/test_tts_synth.py`
-- [ ] T052 [P] [US2] Create failing audio synthesis CLI contract test in `tests/integration/test_synthesize_audio_cli.py`
+- [X] T050 [P] [US2] Create failing audio metadata model and JSONL tests in `tests/unit/test_audio_metadata.py`
+- [X] T051 [P] [US2] Create failing TTS synthesis adapter tests using a deterministic local/silent fixture synthesizer in `tests/unit/test_tts_synth.py`
+- [X] T052 [P] [US2] Create failing audio synthesis CLI contract test in `tests/integration/test_synthesize_audio_cli.py`
 
 ### Implementation
 
-- [ ] T053 [P] [US2] Implement `AudioExample` and synthesis settings models in `packages/tts_synth/models.py`
-- [ ] T054 [US2] Implement deterministic local fixture synthesizer in `packages/tts_synth/synthesizer.py`
-- [ ] T055 [US2] Implement audio metadata JSONL writer in `packages/tts_synth/io.py`
-- [ ] T056 [US2] Implement audio synthesis CLI command in `apps/cli/audio.py`
-- [ ] T057 [US2] Wire audio synthesis script entrypoint in `scripts/synthesize_audio.py`
-- [ ] T058 [US2] Add tiny committed audio fixture or metadata-only fixture for tests in `data/fixtures/audio/README.md`
+- [X] T053 [P] [US2] Implement `AudioExample` and synthesis settings models in `packages/tts_synth/models.py`
+- [X] T054 [US2] Implement deterministic local fixture synthesizer in `packages/tts_synth/synthesizer.py`
+- [X] T055 [US2] Implement audio metadata JSONL writer in `packages/tts_synth/io.py`
+- [X] T056 [US2] Implement audio synthesis CLI command in `apps/cli/audio.py`
+- [X] T057 [US2] Wire audio synthesis script entrypoint in `scripts/synthesize_audio.py`
+- [X] T058 [US2] Add tiny committed audio fixture or metadata-only fixture for tests in `data/fixtures/audio/README.md`
 
 **Checkpoint**: Audio dataset generation is reproducible and linked to text examples without requiring cloud services.
 
