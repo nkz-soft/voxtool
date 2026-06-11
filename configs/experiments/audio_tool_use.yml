@@ -1,0 +1,32 @@
+# Mock run: deterministic smoke for Pipelines C and D using MockModelAdapter/MockASRAdapter.
+# Switch model to "gemma3n" and provide real audio_metadata_path for a manual local run.
+
+mock_run:
+  name: audio-tool-use-mock
+  dataset_version: smoke-v0
+  model: mock
+  limit: 30
+  languages: [en, ru]
+  pipelines: [C, D]
+  artifact_dir: reports/audio-tool-use-mock
+  include_cases:
+    - tool-required
+    - no-tool
+    - invalid-json
+    - invalid-schema
+
+# Manual run: requires a locally available Gemma3n checkpoint and real audio files.
+# Set GEMMA3N_MODEL_PATH before running and point audio_metadata_path at a generated
+# audio metadata JSONL produced by the TTS synthesis step.
+manual_gemma3n_run:
+  name: audio-tool-use-gemma3n
+  dataset_version: v1
+  model: gemma3n
+  limit: null
+  languages: [en, ru]
+  pipelines: [C, D]
+  artifact_dir: reports/audio-tool-use-gemma3n
+  manual_only: true
+  notes: >
+    Gemma3nAdapter.generate_audio() raises NotImplementedError until the local
+    inference backend is wired in. Use this config as a template once implemented.

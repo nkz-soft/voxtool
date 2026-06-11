@@ -9,13 +9,15 @@ from packages.model_runner.mock import MockModelAdapter
 from packages.pipeline_runner.artifacts import PipelineRunRecord
 from packages.pipeline_runner.pipeline_a import run_pipeline_a
 from packages.pipeline_runner.pipeline_b import run_pipeline_b
+from packages.pipeline_runner.pipeline_c import run_pipeline_c
+from packages.pipeline_runner.pipeline_d import run_pipeline_d
 from packages.tool_schema.providers import ToolExecutor, ToolRegistry
 from packages.tts_synth.io import read_jsonl as read_audio_jsonl
 
 
 def run_benchmark(
     *,
-    pipeline: Literal["A", "B"],
+    pipeline: Literal["A", "B", "C", "D"],
     dataset_path: Path,
     output_path: Path,
     run_id: str,
@@ -51,6 +53,35 @@ def run_benchmark(
             audio_examples,
             run_id=run_id,
             asr_adapter=MockASRAdapter(),
+            output_path=output_path,
+        )
+
+    if pipeline == "C":
+        audio_examples = read_audio_jsonl(dataset_path)
+        if limit is not None:
+            audio_examples = audio_examples[:limit]
+
+        return run_pipeline_c(
+            audio_examples,
+            run_id=run_id,
+            model_adapter=MockModelAdapter(),
+            registry=registry,
+            executor=executor,
+            output_path=output_path,
+        )
+
+    if pipeline == "D":
+        audio_examples = read_audio_jsonl(dataset_path)
+        if limit is not None:
+            audio_examples = audio_examples[:limit]
+
+        return run_pipeline_d(
+            audio_examples,
+            run_id=run_id,
+            asr_adapter=MockASRAdapter(),
+            text_adapter=MockModelAdapter(),
+            registry=registry,
+            executor=executor,
             output_path=output_path,
         )
 
