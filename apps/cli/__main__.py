@@ -4,9 +4,10 @@ from pathlib import Path
 
 import typer
 
-from apps.cli import benchmark, dataset
+from apps.cli import audio, benchmark, dataset
 
 app = typer.Typer(help="VoxTool benchmark and demo CLI.")
+app.add_typer(audio.app, name="audio")
 app.add_typer(dataset.app, name="dataset")
 app.add_typer(benchmark.app, name="benchmark")
 
@@ -18,7 +19,7 @@ def text(request: str) -> None:
 
 
 @app.command()
-def audio(path: Path) -> None:
+def audio_input(path: Path) -> None:
     """Accept an audio path for future benchmark/demo processing."""
     typer.echo(f"audio request accepted: {path}")
 
