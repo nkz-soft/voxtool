@@ -27,7 +27,7 @@ def run(
         ),
     ] = None,
     pipeline: Annotated[
-        Literal["A", "B"],
+        Literal["A", "B", "C", "D"],
         typer.Option("--pipeline", help="Pipeline name."),
     ] = "A",
     model: Annotated[
@@ -40,9 +40,10 @@ def run(
     ] = None,
 ) -> None:
     """Run a benchmark pipeline and write PipelineRun JSONL records."""
-    input_path = audio_metadata if pipeline == "B" else dataset
+    audio_pipeline = pipeline in ("B", "C", "D")
+    input_path = audio_metadata if audio_pipeline else dataset
     if input_path is None:
-        option = "--audio-metadata" if pipeline == "B" else "--dataset"
+        option = "--audio-metadata" if audio_pipeline else "--dataset"
         raise typer.BadParameter(f"{option} is required for Pipeline {pipeline}")
 
     registry = default_tool_registry()

@@ -204,19 +204,19 @@
 
 ### Tests First
 
-- [ ] T068 [P] [US3] Create failing `Gemma3nAdapter` capability and mock audio-output tests in `tests/unit/test_gemma3n_adapter.py`
-- [ ] T069 [P] [US3] Create failing Pipeline C orchestration test with registry/executor-only tool calls in `tests/integration/test_pipeline_c.py`
-- [ ] T070 [P] [US4] Create failing Pipeline D orchestration test combining ASR, TextLLM adapters, and registry/executor-only tool calls in `tests/integration/test_pipeline_d.py`
-- [ ] T071 [P] [US4] Create failing all-pipelines smoke orchestration test with `MockModelAdapter` in `tests/e2e/test_all_pipelines_smoke.py`
+- [X] T068 [P] [US3] Create failing `Gemma3nAdapter` capability and mock audio-output tests in `tests/unit/test_gemma3n_adapter.py`
+- [X] T069 [P] [US3] Create failing Pipeline C orchestration test with registry/executor-only tool calls in `tests/integration/test_pipeline_c.py`
+- [X] T070 [P] [US4] Create failing Pipeline D orchestration test combining ASR, TextLLM adapters, and registry/executor-only tool calls in `tests/integration/test_pipeline_d.py`
+- [X] T071 [P] [US4] Create failing all-pipelines smoke orchestration test with `MockModelAdapter` in `tests/e2e/test_all_pipelines_smoke.py`
 
 ### Implementation
 
-- [ ] T072 [P] [US3] Implement `Gemma3nAdapter` interface and local/manual-run placeholder behavior in `packages/model_runner/gemma3n.py`
-- [ ] T073 [US3] Implement Pipeline C orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_c.py`
-- [ ] T074 [US4] Implement Pipeline D orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_d.py`
-- [ ] T075 [US3] Extend benchmark runner dispatch for Pipelines C and D in `packages/pipeline_runner/runner.py`
-- [ ] T076 [US4] Extend benchmark CLI pipeline selection for A-D in `apps/cli/benchmark.py`
-- [ ] T077 [US3] Add experiment config examples for mock and manual Gemma3n runs in `configs/experiments/audio_tool_use.yml`
+- [X] T072 [P] [US3] Implement `Gemma3nAdapter` interface and local/manual-run placeholder behavior in `packages/model_runner/gemma3n.py`
+- [X] T073 [US3] Implement Pipeline C orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_c.py`
+- [X] T074 [US4] Implement Pipeline D orchestration using only `ToolRegistry` and `ToolExecutor` for tool calls in `packages/pipeline_runner/pipeline_d.py`
+- [X] T075 [US3] Extend benchmark runner dispatch for Pipelines C and D in `packages/pipeline_runner/runner.py`
+- [X] T076 [US4] Extend benchmark CLI pipeline selection for A-D in `apps/cli/benchmark.py`
+- [X] T077 [US3] Add experiment config examples for mock and manual Gemma3n runs in `configs/experiments/audio_tool_use.yml`
 
 **Checkpoint**: US3 and US4 are independently testable on audio examples with deterministic mock adapters.
 
