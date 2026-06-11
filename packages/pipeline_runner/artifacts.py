@@ -29,6 +29,7 @@ class PipelineRunRecord(BaseModel):
     validation_errors: list[str] = Field(default_factory=list)
     structured_failures: list[StructuredToolFailure] = Field(default_factory=list)
     transcript: str | None = None
+    wer: float | None = None
     tool_execution_result: ToolResult | None = None
     final_answer: str | None = None
 
