@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from packages.model_runner.gemma3n import Gemma3nAdapter
 from packages.tts_synth.models import AudioExample, SynthesisSettings
 
@@ -37,6 +36,6 @@ def test_gemma3n_adapter_raises_not_implemented_on_generate_audio() -> None:
 
 
 def test_gemma3n_adapter_is_a_placeholder_for_manual_runs() -> None:
-    adapter = Gemma3nAdapter()
+    doc = (Gemma3nAdapter.__doc__ or "").lower()
 
-    assert "manual" in adapter.__doc__.lower() or "placeholder" in adapter.__doc__.lower()
+    assert "manual" in doc or "placeholder" in doc
