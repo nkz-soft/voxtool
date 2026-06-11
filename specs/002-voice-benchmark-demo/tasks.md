@@ -179,18 +179,18 @@
 
 ### Tests First
 
-- [ ] T059 [P] [US2] Create failing transcript normalization and WER tests for Russian and English in `tests/unit/test_asr_eval.py`
-- [ ] T060 [P] [US2] Create failing `ASRAdapter` protocol/mock tests in `tests/unit/test_asr_adapter.py`
-- [ ] T061 [P] [US2] Create failing Pipeline B orchestration test in `tests/integration/test_pipeline_b.py`
+- [X] T059 [P] [US2] Create failing transcript normalization and WER tests for Russian and English in `tests/unit/test_asr_eval.py`
+- [X] T060 [P] [US2] Create failing `ASRAdapter` protocol/mock tests in `tests/unit/test_asr_adapter.py`
+- [X] T061 [P] [US2] Create failing Pipeline B orchestration test in `tests/integration/test_pipeline_b.py`
 
 ### Implementation
 
-- [ ] T062 [P] [US2] Implement transcript normalization helpers in `packages/asr_eval/normalization.py`
-- [ ] T063 [US2] Implement WER calculation wrapper around jiwer in `packages/asr_eval/wer.py`
-- [ ] T064 [US2] Implement `ASRAdapter` interface and deterministic mock behavior in `packages/model_runner/asr.py`
-- [ ] T065 [US2] Implement Pipeline B orchestration in `packages/pipeline_runner/pipeline_b.py`
-- [ ] T066 [US2] Extend benchmark runner dispatch for Pipeline B in `packages/pipeline_runner/runner.py`
-- [ ] T067 [US2] Extend benchmark CLI audio arguments for Pipeline B in `apps/cli/benchmark.py`
+- [X] T062 [P] [US2] Implement transcript normalization helpers in `packages/asr_eval/normalization.py`
+- [X] T063 [US2] Implement WER calculation wrapper around jiwer in `packages/asr_eval/wer.py`
+- [X] T064 [US2] Implement `ASRAdapter` interface and deterministic mock behavior in `packages/model_runner/asr.py`
+- [X] T065 [US2] Implement Pipeline B orchestration in `packages/pipeline_runner/pipeline_b.py`
+- [X] T066 [US2] Extend benchmark runner dispatch for Pipeline B in `packages/pipeline_runner/runner.py`
+- [X] T067 [US2] Extend benchmark CLI audio arguments for Pipeline B in `apps/cli/benchmark.py`
 
 **Checkpoint**: US2 is independently functional for transcript-only audio baseline and WER evaluation.
 
