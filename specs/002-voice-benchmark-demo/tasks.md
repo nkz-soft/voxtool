@@ -258,15 +258,15 @@
 
 ### Tests First
 
-- [ ] T090 [P] [US5] Create failing optional API contract tests for `/demo/text` in `tests/integration/test_api_text_demo.py`
-- [ ] T091 [P] [US5] Create failing optional API contract tests for `/demo/audio` in `tests/integration/test_api_audio_demo.py`
+- [X] T090 [P] [US5] Create failing optional API contract tests for `/demo/text` in `tests/integration/test_api_text_demo.py`
+- [X] T091 [P] [US5] Create failing optional API contract tests for `/demo/audio` in `tests/integration/test_api_audio_demo.py`
 
 ### Implementation
 
-- [ ] T092 [US5] Implement FastAPI app factory and dependency wiring in `apps/api/main.py`
-- [ ] T093 [US5] Implement `/demo/text` route using only `ToolRegistry` and `ToolExecutor` for tool calls in `apps/api/routes_text.py`
-- [ ] T094 [US5] Implement `/demo/audio` route using only `ToolRegistry` and `ToolExecutor` for tool calls in `apps/api/routes_audio.py`
-- [ ] T095 [US5] Add API package entrypoint in `apps/api/__main__.py`
+- [X] T092 [US5] Implement FastAPI app factory and dependency wiring in `apps/api/main.py`
+- [X] T093 [US5] Implement `/demo/text` route using only `ToolRegistry` and `ToolExecutor` for tool calls in `apps/api/routes_text.py`
+- [X] T094 [US5] Implement `/demo/audio` route using only `ToolRegistry` and `ToolExecutor` for tool calls in `apps/api/routes_audio.py`
+- [X] T095 [US5] Add API package entrypoint in `apps/api/__main__.py`
 
 **Checkpoint**: Optional local API supports demo execution but remains secondary to CLI/notebook/report workflows.
 
