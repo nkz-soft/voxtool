@@ -230,21 +230,21 @@
 
 ### Tests First
 
-- [ ] T078 [P] [US5] Create failing tool metric tests for parsability rate, repair success rate, tool decision accuracy, confusion matrix, precision, recall, and false alarm rate in `tests/unit/test_tool_metrics.py`
-- [ ] T079 [P] [US5] Create failing exact match and per-field argument metric tests for partially correct calls in `tests/unit/test_exact_match_metrics.py`
-- [ ] T080 [P] [US5] Create failing modality gap metric tests using paired text/audio example IDs in `tests/unit/test_modality_gap.py`
-- [ ] T081 [P] [US5] Create failing report builder contract test in `tests/integration/test_report_builder.py`
+- [X] T078 [P] [US5] Create failing tool metric tests for parsability rate, repair success rate, tool decision accuracy, confusion matrix, precision, recall, and false alarm rate in `tests/unit/test_tool_metrics.py`
+- [X] T079 [P] [US5] Create failing exact match and per-field argument metric tests for partially correct calls in `tests/unit/test_exact_match_metrics.py`
+- [X] T080 [P] [US5] Create failing modality gap metric tests using paired text/audio example IDs in `tests/unit/test_modality_gap.py`
+- [X] T081 [P] [US5] Create failing report builder contract test in `tests/integration/test_report_builder.py`
 
 ### Implementation
 
-- [ ] T082 [P] [US5] Implement tool-use metric calculations in `packages/metrics/tool_use.py`
-- [ ] T083 [P] [US5] Implement modality gap calculations in `packages/metrics/modality_gap.py`
-- [ ] T084 [US5] Implement metrics aggregation with pandas and CSV/Parquet output in `packages/metrics/aggregation.py`
-- [ ] T085 [US5] Implement failure case categorization in `packages/metrics/failure_cases.py`
-- [ ] T086 [US5] Implement report tables and best-pipeline selection logic in `packages/report_builder/report.py`
-- [ ] T087 [P] [US5] Implement matplotlib plot helpers for report artifacts in `packages/report_builder/plots.py`
-- [ ] T088 [US5] Implement report CLI command in `apps/cli/report.py`
-- [ ] T089 [US5] Wire report script entrypoint in `scripts/build_report.py`
+- [X] T082 [P] [US5] Implement tool-use metric calculations in `packages/metrics/tool_use.py`
+- [X] T083 [P] [US5] Implement modality gap calculations in `packages/metrics/modality_gap.py`
+- [X] T084 [US5] Implement metrics aggregation with pandas and CSV/Parquet output in `packages/metrics/aggregation.py`
+- [X] T085 [US5] Implement failure case categorization in `packages/metrics/failure_cases.py`
+- [X] T086 [US5] Implement report tables and best-pipeline selection logic in `packages/report_builder/report.py`
+- [X] T087 [P] [US5] Implement matplotlib plot helpers for report artifacts in `packages/report_builder/plots.py`
+- [X] T088 [US5] Implement report CLI command in `apps/cli/report.py`
+- [X] T089 [US5] Wire report script entrypoint in `scripts/build_report.py`
 
 **Checkpoint**: US5 report review is independently functional from saved benchmark artifacts.
 
