@@ -34,6 +34,17 @@ class PipelineRunRecord(BaseModel):
     final_answer: str | None = None
 
 
+def read_pipeline_jsonl(path: Path) -> list[PipelineRunRecord]:
+    """Read pipeline run records from a UTF-8 JSONL artifact."""
+    records: list[PipelineRunRecord] = []
+    with path.open("r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if line:
+                records.append(PipelineRunRecord.model_validate(json.loads(line)))
+    return records
+
+
 def write_pipeline_jsonl(path: Path, records: Iterable[PipelineRunRecord]) -> int:
     """Write pipeline run records as UTF-8 JSONL and return the count."""
     path.parent.mkdir(parents=True, exist_ok=True)
