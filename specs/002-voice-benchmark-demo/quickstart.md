@@ -3,49 +3,64 @@
 ## Prerequisites
 
 - Python 3.11+
-- Local development environment with project dependencies installed
+- `uv` for dependency management
 - No cloud service, paid API, GPU, or real model download is required for MVP smoke validation
 
 ## Install
 
 ```powershell
-python -m pip install -e ".[dev]"
+make install
+```
+
+or directly:
+
+```powershell
+uv sync --all-groups
 ```
 
 ## Generate The Dataset
 
 ```powershell
-python scripts/generate_dataset.py --version v1 --output data/generated/v1/examples.jsonl
+uv run python scripts/generate_dataset.py --version v1 --output data/generated/v1/examples.jsonl
 ```
 
 Expected result:
 
-- 240 JSONL text examples
+- 240 JSONL text examples at `data/generated/v1/examples.jsonl`
 - 120 Russian and 120 English examples
 - 15% no-tool examples overall and per language
 - deterministic 70/15/15 train/validation/test split
-- expected `needs_tool`, `tool_call`, and `final_answer` fields
+- expected `needs_tool`, `expected_tool_call`, and `expected_final_answer` fields
 
 ## Synthesize Audio
 
 ```powershell
-python scripts/synthesize_audio.py --dataset data/generated/v1/examples.jsonl --output data/generated/v1/audio
+uv run python scripts/synthesize_audio.py --dataset data/generated/v1/examples.jsonl --output data/generated/v1/audio
 ```
 
 Expected result:
 
-- one audio artifact per text example
-- audio metadata JSONL linking `audio_id` to `example_id`
+- one deterministic audio fixture per text example under `data/generated/v1/audio/`
+- audio metadata JSONL at `data/generated/v1/audio/audio.jsonl` linking `audio_id` to `example_id`
 - synthesis settings recorded for reproducibility
 
 ## Run Deterministic Smoke Benchmark
 
+Pipeline A consumes the text dataset; pipelines B, C, and D consume the audio
+metadata JSONL. Run each pipeline with the mock adapter:
+
 ```powershell
-python scripts/run_benchmark.py --dataset data/generated/v1/examples.jsonl --adapter mock --pipelines A,B,C,D --output runs/smoke
+uv run python scripts/run_benchmark.py --pipeline A --dataset data/generated/v1/examples.jsonl --run-id smoke --model mock --output runs/smoke/pipeline-a.jsonl
+uv run python scripts/run_benchmark.py --pipeline B --audio-metadata data/generated/v1/audio/audio.jsonl --run-id smoke --model mock --output runs/smoke/pipeline-b.jsonl
+uv run python scripts/run_benchmark.py --pipeline C --audio-metadata data/generated/v1/audio/audio.jsonl --run-id smoke --model mock --output runs/smoke/pipeline-c.jsonl
+uv run python scripts/run_benchmark.py --pipeline D --audio-metadata data/generated/v1/audio/audio.jsonl --run-id smoke --model mock --output runs/smoke/pipeline-d.jsonl
 ```
+
+Add `--limit 30` to any command for a faster bounded run.
 
 Expected result:
 
+- one `PipelineRun` JSONL artifact per pipeline under `runs/smoke/`
 - raw model outputs saved for every example
 - parsed envelopes saved when valid
 - validation errors saved when invalid
@@ -53,13 +68,18 @@ Expected result:
 - registered tool manifests built for prompts and validation
 - optional tool execution results recorded only through `ToolRegistry` and `ToolExecutor`
 - structured failures recorded for unknown tools, invalid arguments, and execution errors
-- per-pipeline metrics summaries written as CSV or Parquet
 
 ## Build Report
 
 ```powershell
-python scripts/build_report.py --runs runs/smoke --output reports/smoke-report.md
+uv run python scripts/build_report.py --dataset data/generated/v1/examples.jsonl --run runs/smoke/pipeline-a.jsonl --run runs/smoke/pipeline-b.jsonl --run runs/smoke/pipeline-c.jsonl --run runs/smoke/pipeline-d.jsonl --output reports/smoke-report.md --summary reports/smoke-summary.csv --plots-dir reports/plots
 ```
+
+Expected result:
+
+- markdown report at `reports/smoke-report.md`
+- per-pipeline metrics summary at `reports/smoke-summary.csv` (use a `.parquet` suffix for Parquet)
+- plot images under `reports/plots/`
 
 Expected report contents:
 
@@ -75,10 +95,10 @@ Expected report contents:
 ## Run Tests
 
 ```powershell
-python -m pytest
-python -m ruff check .
-python -m ruff format --check .
-python -m mypy
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy
 ```
 
 Required coverage areas:
@@ -96,14 +116,18 @@ Required coverage areas:
 ## Optional Demo API
 
 ```powershell
-python -m apps.api
+uv run python -m apps.api
 ```
 
 The optional API is for local demo execution only. The MVP does not require a complex UI.
 
 ## Demo Notebook
 
-Open the notebook under `apps/notebook/` after generating a dataset and at least one benchmark run. It should demonstrate Russian and English examples for text input, audio transcript output, audio tool calling, optional execution, and final answer display.
+Open `apps/notebook/voice_benchmark_demo.ipynb`. It runs against the committed
+fixture dataset out of the box (or `data/generated/v1/` when generated) and
+demonstrates Russian and English text examples, audio transcript output, audio
+tool calling, optional execution, metrics, and the final report. Notebook
+artifacts are written under `runs/notebook/` and stay outside Git.
 
 ## PR Evidence
 
@@ -115,3 +139,5 @@ Include:
 - pytest output
 - deterministic smoke benchmark command and artifact path
 - generated report path or summary
+
+See `specs/002-voice-benchmark-demo/validation.md` for recorded evidence.
