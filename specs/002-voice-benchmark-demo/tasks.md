@@ -278,13 +278,13 @@
 
 **Independent Test**: Follow `quickstart.md` using mock adapters and open the notebook to inspect Russian and English text/audio examples, parsed JSON, optional execution, metrics, and report links.
 
-- [ ] T096 [P] [US5] Create final demo notebook with text, audio, pipeline, metrics, and report cells in `apps/notebook/voice_benchmark_demo.ipynb`
-- [ ] T097 [P] [US5] Add notebook helper module for loading artifacts and examples in `apps/notebook/helpers.py`
-- [ ] T098 [US5] Update feature quickstart commands and expected artifact paths in `specs/002-voice-benchmark-demo/quickstart.md`
-- [ ] T099 [US5] Add repository README section for MVP scope, non-goals, and quickstart in `README.md`
-- [ ] T100 [US5] Add CI workflow for ruff, pytest, and mock smoke benchmark in `.github/workflows/ci.yml`
-- [ ] T101 [US5] Add smoke benchmark workflow artifact upload for generated metrics in `.github/workflows/benchmark-smoke.yml`
-- [ ] T102 [US5] Run final validation commands from `specs/002-voice-benchmark-demo/quickstart.md` and record evidence in `specs/002-voice-benchmark-demo/validation.md`
+- [X] T096 [P] [US5] Create final demo notebook with text, audio, pipeline, metrics, and report cells in `apps/notebook/voice_benchmark_demo.ipynb`
+- [X] T097 [P] [US5] Add notebook helper module for loading artifacts and examples in `apps/notebook/helpers.py`
+- [X] T098 [US5] Update feature quickstart commands and expected artifact paths in `specs/002-voice-benchmark-demo/quickstart.md`
+- [X] T099 [US5] Add repository README section for MVP scope, non-goals, and quickstart in `README.md`
+- [X] T100 [US5] Add CI workflow for ruff, pytest, and mock smoke benchmark in `.github/workflows/ci.yml`
+- [X] T101 [US5] Add smoke benchmark workflow artifact upload for generated metrics in `.github/workflows/benchmark-smoke.yml`
+- [X] T102 [US5] Run final validation commands from `specs/002-voice-benchmark-demo/quickstart.md` and record evidence in `specs/002-voice-benchmark-demo/validation.md`
 
 **Checkpoint**: Documentation, notebook, smoke validation, and PR evidence are ready.
 

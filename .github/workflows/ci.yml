@@ -32,6 +32,8 @@ jobs:
         run: uv run pytest --junitxml=pytest.xml
         env:
           PYTHONPATH: .
+      - name: Mock smoke benchmark
+        run: make benchmark-smoke
       - name: Publish coverage summary to PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: MishaKav/pytest-coverage-comment@v1

@@ -19,21 +19,22 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run a benchmark pipeline.")
     parser.add_argument("--dataset", default=None)
     parser.add_argument("--audio-metadata", default=None)
-    parser.add_argument("--pipeline", choices=["A", "B"], default="A")
+    parser.add_argument("--pipeline", choices=["A", "B", "C", "D"], default="A")
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--model", default="mock")
     parser.add_argument("--output", required=True)
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
 
-    input_path = args.audio_metadata if args.pipeline == "B" else args.dataset
+    audio_pipeline = args.pipeline in ("B", "C", "D")
+    input_path = args.audio_metadata if audio_pipeline else args.dataset
     if input_path is None:
-        option = "--audio-metadata" if args.pipeline == "B" else "--dataset"
+        option = "--audio-metadata" if audio_pipeline else "--dataset"
         parser.error(f"{option} is required for Pipeline {args.pipeline}")
 
     registry = default_tool_registry()
     run_benchmark(
-        pipeline=cast(Literal["A", "B"], args.pipeline),
+        pipeline=cast(Literal["A", "B", "C", "D"], args.pipeline),
         dataset_path=Path(input_path),
         output_path=Path(args.output),
         run_id=args.run_id,

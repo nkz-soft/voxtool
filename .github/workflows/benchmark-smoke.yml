@@ -25,3 +25,11 @@ jobs:
           name: benchmark-smoke
           path: reports/smoke
           retention-days: 14
+      - name: Upload smoke metrics
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-smoke-metrics
+          path: |
+            reports/smoke/metrics-summary.csv
+            reports/smoke/report.md
+          retention-days: 14
