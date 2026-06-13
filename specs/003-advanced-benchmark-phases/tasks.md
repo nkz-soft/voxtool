@@ -31,20 +31,20 @@
 
 **Purpose**: Build shared abstractions needed by all three roadmap phases while preserving the benchmark JSON and tool-validation trust boundary.
 
-- [ ] T011 [P] Add test package marker for model runner adapter tests in `tests/unit/model_runner/__init__.py`
-- [ ] T012 [P] Add test package marker for fine-tuning tests in `tests/unit/finetuning/__init__.py`
-- [ ] T013 [P] Add test package marker for speech output tests in `tests/unit/speech_output/__init__.py`
-- [ ] T014 [P] Add test package marker for advanced metrics tests in `tests/unit/metrics/__init__.py`
-- [ ] T015 [P] Add test package marker for advanced pipeline tests in `tests/integration/pipeline_runner/__init__.py`
-- [ ] T016 [P] Write failing tests for canonical model response parsing and raw-output retention in `tests/unit/model_runner/test_model_response.py`
-- [ ] T017 [P] Write failing tests for adapter capability selection and unsupported-runtime failures in `tests/unit/model_runner/test_adapter_capabilities.py`
-- [ ] T018 [P] Write failing tests for advanced metric aggregation fields in `tests/unit/metrics/test_advanced_metrics.py`
-- [ ] T019 [P] Write failing tests for advanced pipeline artifact fields in `tests/integration/pipeline_runner/test_advanced_pipeline_artifacts.py`
-- [ ] T020 Define `ModelResponse` and adapter capability models in `packages/model_runner/voice_toolbench_model_runner/adapters/base.py`
-- [ ] T021 Export adapter base interfaces from `packages/model_runner/voice_toolbench_model_runner/adapters/__init__.py`
-- [ ] T022 Add advanced metric result helpers for per-tool, Russian-only, delta, latency, and memory-note fields in `packages/metrics/voice_toolbench_metrics/advanced.py`
-- [ ] T023 Add advanced pipeline artifact field support for adapter IDs, capabilities, profiles, manifest snapshots, speech output, and runtime skips in `packages/pipeline_runner/voice_toolbench_pipeline_runner/artifacts.py`
-- [ ] T024 Add advanced smoke fixture with no real model dependency in `data/fixtures/advanced/sample_text.jsonl`
+- [X] T011 [P] Add test package marker for model runner adapter tests in `tests/unit/model_runner/__init__.py` (flat layout: covered by existing `tests/unit/__init__.py`)
+- [X] T012 [P] Add test package marker for fine-tuning tests in `tests/unit/finetuning/__init__.py` (flat layout: covered by existing `tests/unit/__init__.py`)
+- [X] T013 [P] Add test package marker for speech output tests in `tests/unit/speech_output/__init__.py` (flat layout: covered by existing `tests/unit/__init__.py`)
+- [X] T014 [P] Add test package marker for advanced metrics tests in `tests/unit/metrics/__init__.py` (flat layout: covered by existing `tests/unit/__init__.py`)
+- [X] T015 [P] Add test package marker for advanced pipeline tests in `tests/integration/pipeline_runner/__init__.py` (flat layout: covered by existing `tests/integration/__init__.py`)
+- [X] T016 [P] Write failing tests for canonical model response parsing and raw-output retention in `tests/unit/test_model_response.py`
+- [X] T017 [P] Write failing tests for adapter capability selection and unsupported-runtime failures in `tests/unit/test_adapter_capabilities.py`
+- [X] T018 [P] Write failing tests for advanced metric aggregation fields in `tests/unit/test_advanced_metrics.py`
+- [X] T019 [P] Write failing tests for advanced pipeline artifact fields in `tests/integration/test_advanced_pipeline_artifacts.py`
+- [X] T020 Define `ModelResponse` and adapter capability models in `packages/model_runner/adapters/base.py`
+- [X] T021 Export adapter base interfaces from `packages/model_runner/adapters/__init__.py`
+- [X] T022 Add advanced metric result helpers for per-tool, Russian-only, delta, latency, and memory-note fields in `packages/metrics/advanced.py`
+- [X] T023 Add advanced pipeline artifact field support for adapter IDs, capabilities, profiles, manifest snapshots, speech output, and runtime skips in `packages/pipeline_runner/artifacts.py`
+- [X] T024 Add advanced smoke fixture with no real model dependency in `data/fixtures/advanced/sample_text.jsonl`
 
 **Checkpoint**: Shared interfaces and fixtures are ready; each roadmap phase can proceed with mock-backed tests.
 
