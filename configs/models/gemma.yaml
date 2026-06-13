@@ -1,0 +1,23 @@
+# Gemma adapter configuration.
+# Declares the model only; no eager download happens at config load time. Real
+# weights are fetched lazily on the first generate_text call (manual/Colab/GPU).
+adapter_id: gemma
+model_family: gemma
+model_name: google/gemma-2-9b-it
+inference_profile: base
+eager_download: false
+runtime:
+  requires_gpu: true
+  approximate_memory_gb: 18
+  notes: "Text-only tool-calling model; run manually in Colab or on a GPU runner."
+capabilities:
+  supports_text_input: true
+  supports_audio_input: false
+  supports_transcript_output: false
+  supports_tool_call_output: true
+  supports_lora: true
+  supports_quantization: true
+  supported_pipelines: [A, D]
+generation:
+  max_new_tokens: 512
+  do_sample: false

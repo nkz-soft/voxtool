@@ -58,30 +58,30 @@
 
 ### Tests For Phase 1
 
-- [ ] T025 [P] [US1] Write failing import/config tests for Voxtral adapter and `configs/models/voxtral.yaml` in `tests/unit/model_runner/test_voxtral_adapter_config.py`
-- [ ] T026 [P] [US1] Write failing import/config tests for Qwen adapter and `configs/models/qwen.yaml` in `tests/unit/model_runner/test_qwen_adapter_config.py`
-- [ ] T027 [P] [US1] Write failing import/config tests for Gemma adapter and `configs/models/gemma.yaml` in `tests/unit/model_runner/test_gemma_adapter_config.py`
-- [ ] T028 [P] [US1] Write failing adapter contract tests using `MockModelAdapter` in `tests/unit/model_runner/test_model_adapter_contract.py`
-- [ ] T029 [P] [US1] Write failing Pipeline A mock adapter integration test in `tests/integration/pipeline_runner/test_pipeline_a_model_adapter.py`
-- [ ] T030 [P] [US1] Write failing Pipeline C/D capability skip tests with mock audio capability declarations in `tests/integration/pipeline_runner/test_audio_adapter_capabilities.py`
-- [ ] T031 [P] [US1] Write failing notebook structure smoke test that does not execute real model downloads in `tests/e2e/test_colab_demo_notebook.py`
+- [X] T025 [P] [US1] Write failing import/config tests for Voxtral adapter and `configs/models/voxtral.yaml` in `tests/unit/model_runner/test_voxtral_adapter_config.py`
+- [X] T026 [P] [US1] Write failing import/config tests for Qwen adapter and `configs/models/qwen.yaml` in `tests/unit/model_runner/test_qwen_adapter_config.py`
+- [X] T027 [P] [US1] Write failing import/config tests for Gemma adapter and `configs/models/gemma.yaml` in `tests/unit/model_runner/test_gemma_adapter_config.py`
+- [X] T028 [P] [US1] Write failing adapter contract tests using `MockModelAdapter` in `tests/unit/model_runner/test_model_adapter_contract.py`
+- [X] T029 [P] [US1] Write failing Pipeline A mock adapter integration test in `tests/integration/pipeline_runner/test_pipeline_a_model_adapter.py`
+- [X] T030 [P] [US1] Write failing Pipeline C/D capability skip tests with mock audio capability declarations in `tests/integration/pipeline_runner/test_audio_adapter_capabilities.py`
+- [X] T031 [P] [US1] Write failing notebook structure smoke test that does not execute real model downloads in `tests/e2e/test_colab_demo_notebook.py`
 
 ### Implementation For Phase 1
 
-- [ ] T032 [P] [US1] Implement `VoxtralAdapter` import-safe class in `packages/model_runner/voice_toolbench_model_runner/adapters/voxtral.py`
-- [ ] T033 [P] [US1] Implement `QwenAdapter` import-safe class in `packages/model_runner/voice_toolbench_model_runner/adapters/qwen.py`
-- [ ] T034 [P] [US1] Implement `GemmaAdapter` import-safe class in `packages/model_runner/voice_toolbench_model_runner/adapters/gemma.py`
-- [ ] T035 [P] [US1] Add Voxtral adapter config with no eager model download in `configs/models/voxtral.yaml`
-- [ ] T036 [P] [US1] Add Qwen adapter config with no eager model download in `configs/models/qwen.yaml`
-- [ ] T037 [P] [US1] Add Gemma adapter config with no eager model download in `configs/models/gemma.yaml`
-- [ ] T038 [US1] Add adapter registry loading from config in `packages/model_runner/voice_toolbench_model_runner/registry.py`
-- [ ] T039 [US1] Wire adapter registry selection into benchmark execution in `scripts/run_benchmark.py`
-- [ ] T040 [US1] Wire adapter registry selection into CLI benchmark command in `apps/cli/voice_toolbench_cli/benchmark.py`
-- [ ] T041 [US1] Preserve raw output, parsed JSON, validation results, execution results, final answers, and metrics for real adapters in `packages/pipeline_runner/voice_toolbench_pipeline_runner/runner.py`
-- [ ] T042 [US1] Add structured runtime skip handling for unsupported audio adapters in `packages/pipeline_runner/voice_toolbench_pipeline_runner/capabilities.py`
-- [ ] T043 [US1] Add Colab demo notebook with dependency install, repo load, adapter selection, text run, optional audio upload, validation, execution, final answer, and metrics in `apps/notebook/colab_demo.ipynb`
-- [ ] T044 [US1] Add Colab demo helper module for notebook-safe execution in `apps/notebook/colab_demo_helpers.py`
-- [ ] T045 [US1] Document manual full real-model benchmark and GPU workflow usage in `docs/advanced_real_model_runs.md`
+- [X] T032 [P] [US1] Implement `VoxtralAdapter` import-safe class in `packages/model_runner/voice_toolbench_model_runner/adapters/voxtral.py`
+- [X] T033 [P] [US1] Implement `QwenAdapter` import-safe class in `packages/model_runner/voice_toolbench_model_runner/adapters/qwen.py`
+- [X] T034 [P] [US1] Implement `GemmaAdapter` import-safe class in `packages/model_runner/voice_toolbench_model_runner/adapters/gemma.py`
+- [X] T035 [P] [US1] Add Voxtral adapter config with no eager model download in `configs/models/voxtral.yaml`
+- [X] T036 [P] [US1] Add Qwen adapter config with no eager model download in `configs/models/qwen.yaml`
+- [X] T037 [P] [US1] Add Gemma adapter config with no eager model download in `configs/models/gemma.yaml`
+- [X] T038 [US1] Add adapter registry loading from config in `packages/model_runner/voice_toolbench_model_runner/registry.py`
+- [X] T039 [US1] Wire adapter registry selection into benchmark execution in `scripts/run_benchmark.py`
+- [X] T040 [US1] Wire adapter registry selection into CLI benchmark command in `apps/cli/voice_toolbench_cli/benchmark.py`
+- [X] T041 [US1] Preserve raw output, parsed JSON, validation results, execution results, final answers, and metrics for real adapters in `packages/pipeline_runner/voice_toolbench_pipeline_runner/runner.py`
+- [X] T042 [US1] Add structured runtime skip handling for unsupported audio adapters in `packages/pipeline_runner/voice_toolbench_pipeline_runner/capabilities.py`
+- [X] T043 [US1] Add Colab demo notebook with dependency install, repo load, adapter selection, text run, optional audio upload, validation, execution, final answer, and metrics in `apps/notebook/colab_demo.ipynb`
+- [X] T044 [US1] Add Colab demo helper module for notebook-safe execution in `apps/notebook/colab_demo_helpers.py`
+- [X] T045 [US1] Document manual full real-model benchmark and GPU workflow usage in `docs/advanced_real_model_runs.md`
 
 **Checkpoint**: Phase 1 is independently testable with mocks/import checks in CI and manually demonstrable in Colab with at least one real adapter.
 

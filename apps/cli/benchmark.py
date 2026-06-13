@@ -31,9 +31,16 @@ def run(
         typer.Option("--pipeline", help="Pipeline name."),
     ] = "A",
     model: Annotated[
-        Literal["mock"],
+        Literal["mock", "voxtral", "qwen", "gemma"],
         typer.Option("--model", help="Model adapter name."),
     ] = "mock",
+    config_path: Annotated[
+        Path | None,
+        typer.Option(
+            "--config-path",
+            help="Adapter config YAML (default: configs/models/<model>.yaml).",
+        ),
+    ] = None,
     limit: Annotated[
         int | None,
         typer.Option("--limit", help="Optional maximum examples to run."),
@@ -55,6 +62,7 @@ def run(
         registry=registry,
         executor=ToolExecutor(registry),
         model=model,
+        config_path=config_path,
         limit=limit,
     )
     typer.echo(f"wrote {len(records)} Pipeline {pipeline} records to {output}")

@@ -21,7 +21,16 @@ def main() -> None:
     parser.add_argument("--audio-metadata", default=None)
     parser.add_argument("--pipeline", choices=["A", "B", "C", "D"], default="A")
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--model", default="mock")
+    parser.add_argument(
+        "--model",
+        choices=["mock", "voxtral", "qwen", "gemma"],
+        default="mock",
+    )
+    parser.add_argument(
+        "--config-path",
+        default=None,
+        help="Optional adapter config YAML (defaults to configs/models/<model>.yaml).",
+    )
     parser.add_argument("--output", required=True)
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
@@ -40,7 +49,8 @@ def main() -> None:
         run_id=args.run_id,
         registry=registry,
         executor=ToolExecutor(registry),
-        model=cast(Literal["mock"], args.model),
+        model=args.model,
+        config_path=Path(args.config_path) if args.config_path else None,
         limit=args.limit,
     )
 
