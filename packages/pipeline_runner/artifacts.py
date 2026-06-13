@@ -7,7 +7,33 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from packages.tool_schema.providers import StructuredToolFailure, ToolResult
+from packages.tool_schema.providers import (
+    StructuredToolFailure,
+    ToolManifest,
+    ToolResult,
+)
+
+
+class SpeechOutputArtifact(BaseModel):
+    """Optional final-answer speech output status attached to a pipeline run.
+
+    ``generation_status`` distinguishes generated audio from intentionally
+    ``disabled`` runs, capability ``skipped`` runs, and ``failed`` synthesis.
+    A failure keeps the record (with no path) so it never erases tool-call
+    metrics. Identity fields are optional so the same model serves both the
+    embedded pipeline field and standalone speech manifests.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    generation_status: Literal["generated", "disabled", "skipped", "failed"]
+    speech_output_path: str | None = None
+    speech_provider: str | None = None
+    generation_error: str | None = None
+    speech_output_id: str | None = None
+    run_id: str | None = None
+    example_id: str | None = None
+    input_final_answer: str | None = None
 
 
 class PipelineRunRecord(BaseModel):
@@ -32,6 +58,16 @@ class PipelineRunRecord(BaseModel):
     wer: float | None = None
     tool_execution_result: ToolResult | None = None
     final_answer: str | None = None
+    # Advanced phase fields. Optional so existing artifacts stay valid; they
+    # capture which adapter/profile produced the run, the tool manifest in
+    # effect, optional speech output, and runtime skips that are distinct from
+    # model-output failures.
+    adapter_id: str | None = None
+    adapter_capabilities: dict[str, Any] | None = None
+    inference_profile: str | None = None
+    tool_manifest_snapshot: list[ToolManifest] = Field(default_factory=list)
+    speech_output: SpeechOutputArtifact | None = None
+    runtime_skip_reason: str | None = None
 
 
 def read_pipeline_jsonl(path: Path) -> list[PipelineRunRecord]:
