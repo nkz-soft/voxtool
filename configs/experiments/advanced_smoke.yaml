@@ -1,0 +1,35 @@
+# Advanced roadmap smoke config.
+#
+# Deterministic, mock-only smoke for the advanced benchmark phases (real model
+# adapters, LoRA/SFT, speech output, multi-tool, and quantized inference).
+# This config MUST stay runnable in ordinary CI: it uses the mock model adapter,
+# a small bounded fixture, and never downloads real models or requires a GPU.
+#
+# To run a heavyweight variant, copy this file, switch `model` to a real adapter
+# (e.g. voxtral/qwen/gemma), point `dataset_version` at a full dataset, and run
+# it manually or via the GPU benchmark workflow_dispatch workflow.
+
+name: advanced-smoke
+dataset_version: smoke-v0
+model: mock
+limit: 30
+languages: [en, ru]
+pipelines: [A, B, C, D]
+artifact_dir: reports/advanced-smoke
+fixture_path: data/fixtures/advanced/sample_text.jsonl
+include_cases:
+  - tool-required
+  - no-tool
+  - invalid-json
+  - invalid-schema
+
+# Optional advanced capabilities are declared but disabled for CI smoke runs.
+# They are exercised through mocks / capability declarations only.
+advanced:
+  speech_output: false
+  lora_eval: false
+  quantization: false
+  manual_only_profiles:
+    - full_precision
+    - quantized_8bit
+    - quantized_4bit

@@ -1,5 +1,15 @@
 name: CI
 
+# CI RESOURCE BOUNDARY (advanced benchmark phases):
+#   Ordinary CI MUST stay lightweight. Do NOT add steps that download real
+#   models, pull Hugging Face checkpoints, run LoRA/SFT training, synthesize
+#   speech, or require a GPU. The optional dependency groups
+#   (notebook/model/finetuning/speech/quantization) MUST NOT be installed here.
+#   `make install` installs only the base + dev groups by design.
+#   Real-model, GPU, fine-tuning, speech, and quantized runs are MANUAL and live
+#   in `.github/workflows/gpu-benchmarks.yml` (workflow_dispatch only).
+#   All model behavior in CI is mock-backed via MockModelAdapter and fixtures.
+
 on:
   push:
     branches: [main, develop]
@@ -21,6 +31,8 @@ jobs:
         with:
           python-version-file: .python-version
       - name: Install dependencies
+        # Lightweight install only (base + dev). No real-model / GPU / speech
+        # extras. See the CI RESOURCE BOUNDARY note at the top of this file.
         run: make install
       - name: Ruff check
         run: uv run ruff check .
