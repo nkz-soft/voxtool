@@ -29,6 +29,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.6.0",
     "types-jsonschema>=4.25.1",
+    "types-PyYAML>=6.0.12",
 ]
 
 # Optional, heavyweight dependency groups for the advanced benchmark phases.
@@ -77,6 +78,13 @@ indent-style = "space"
 python_version = "3.11"
 strict = true
 files = ["apps", "packages", "scripts", "tests"]
+
+# Optional heavyweight model dependencies are not installed in ordinary CI and
+# are imported lazily inside real adapters. Ignore their missing stubs so the
+# import-safe adapters still typecheck without the `model` group installed.
+[[tool.mypy.overrides]]
+module = ["transformers.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
