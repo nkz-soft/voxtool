@@ -1,0 +1,85 @@
+name: GPU Benchmarks (Manual)
+
+# Manual-only heavyweight benchmark workflow for the advanced phases.
+#
+# This workflow is NEVER triggered by push or pull_request. It runs only via
+# manual `workflow_dispatch` and is the designated home for real-model, GPU,
+# fine-tuning, speech, and quantized runs that are forbidden in ordinary CI
+# (see the CI RESOURCE BOUNDARY note in ci.yml).
+#
+# It targets a GPU-capable runner. The default `ubuntu-latest` GitHub-hosted
+# runner has no GPU, so set `runner_label` to a self-hosted GPU runner (or an
+# appropriate GPU-enabled runner label) when dispatching. The job steps below
+# are a SKELETON: the heavyweight install/run/upload steps are intentionally
+# left commented out until the advanced adapters, scripts, and configs land in
+# later phases.
+
+on:
+  workflow_dispatch:
+    inputs:
+      experiment_config:
+        description: "Path to the experiment config to run (e.g. configs/experiments/advanced_smoke.yaml)."
+        required: true
+        default: configs/experiments/advanced_smoke.yaml
+      model:
+        description: "Model adapter to use (e.g. voxtral, qwen, gemma)."
+        required: true
+        default: mock
+      runner_label:
+        description: "Runner label to execute on. Use a self-hosted GPU runner label for real runs."
+        required: true
+        default: ubuntu-latest
+      enable_quantization:
+        description: "Enable quantized inference profiles."
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  gpu-benchmark:
+    # Runner is selectable at dispatch time so a self-hosted GPU runner can be used.
+    runs-on: ${{ inputs.runner_label }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Show dispatch parameters
+        run: |
+          echo "Experiment config: ${{ inputs.experiment_config }}"
+          echo "Model:             ${{ inputs.model }}"
+          echo "Runner label:      ${{ inputs.runner_label }}"
+          echo "Quantization:      ${{ inputs.enable_quantization }}"
+
+      # --- SKELETON: heavyweight steps are wired in by later advanced phases. ---
+      #
+      # - name: Install advanced dependencies (model + optional finetuning/speech/quantization)
+      #   run: make install-advanced
+      #
+      # - name: Verify GPU availability
+      #   run: nvidia-smi
+      #
+      # - name: Run advanced benchmark
+      #   run: |
+      #     uv run python scripts/run_benchmark.py \
+      #       --config "${{ inputs.experiment_config }}" \
+      #       --model "${{ inputs.model }}"
+      #
+      # - name: Upload benchmark artifacts
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: gpu-benchmark-results
+      #     path: reports/
+      #     retention-days: 14
+
+      - name: Skeleton notice
+        run: |
+          echo "GPU benchmark workflow skeleton."
+          echo "Real-model / GPU / fine-tuning / speech / quantized steps are"
+          echo "added in later advanced phases. No heavyweight work runs yet."

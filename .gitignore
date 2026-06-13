@@ -252,9 +252,44 @@ wandb/
 mlruns/
 large-datasets/
 
+# Advanced roadmap generated artifacts (Phase 1+)
+#   Heavyweight outputs from real model runs, fine-tuning, speech synthesis, and
+#   quantized inference are never committed. Configs, small fixtures, notebooks,
+#   and contracts ARE tracked.
+# Model / adapter caches and downloads
+.cache/huggingface/
+huggingface/
+hf-cache/
+model-cache/
+adapter-cache/
+*.onnx
+# LoRA / SFT fine-tuning runs and checkpoints
+lora-runs/
+lora_runs/
+sft-runs/
+finetuning-runs/
+peft-checkpoints/
+lora-adapters/
+# Quantized inference runs and artifacts
+quantized-runs/
+quantized_runs/
+*.gptq
+*.awq
+# Generated speech output
+speech-generated/
+speech_output/
+tts-output/
+# Advanced fixtures that are generated rather than tracked
+data/fixtures/advanced/generated/**
+
 # Keep repository placeholders and policy docs
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/README.md
 !reports/.gitkeep
 !reports/README.md
+!data/fixtures/advanced/.gitkeep
+!configs/models/.gitkeep
+!configs/finetuning/.gitkeep
+!configs/datasets/.gitkeep
+!configs/inference/.gitkeep

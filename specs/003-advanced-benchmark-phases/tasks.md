@@ -12,16 +12,16 @@
 
 **Purpose**: Establish package/config/test scaffolding and CI boundaries that all three implementation phases depend on.
 
-- [ ] T001 Create advanced roadmap fixture directory placeholders in `data/fixtures/advanced/.gitkeep`
-- [ ] T002 [P] Create model config directory placeholders in `configs/models/.gitkeep`
-- [ ] T003 [P] Create fine-tuning config directory placeholders in `configs/finetuning/.gitkeep`
-- [ ] T004 [P] Create dataset config directory placeholders in `configs/datasets/.gitkeep`
-- [ ] T005 [P] Create inference config directory placeholders in `configs/inference/.gitkeep`
-- [ ] T006 [P] Create advanced experiment config placeholder in `configs/experiments/advanced_smoke.yaml`
-- [ ] T007 Add optional dependency groups for notebook/model/fine-tuning/speech/quantization without enabling them in default CI in `pyproject.toml`
-- [ ] T008 Add or update generated artifact ignore rules for model caches, checkpoints, generated speech, LoRA runs, and quantized runs in `.gitignore`
-- [ ] T009 Add normal CI guard comments that real model downloads are forbidden in `.github/workflows/ci.yml`
-- [ ] T010 [P] Add manual GPU benchmark workflow skeleton using `workflow_dispatch` in `.github/workflows/gpu-benchmarks.yml`
+- [X] T001 Create advanced roadmap fixture directory placeholders in `data/fixtures/advanced/.gitkeep`
+- [X] T002 [P] Create model config directory placeholders in `configs/models/.gitkeep`
+- [X] T003 [P] Create fine-tuning config directory placeholders in `configs/finetuning/.gitkeep`
+- [X] T004 [P] Create dataset config directory placeholders in `configs/datasets/.gitkeep`
+- [X] T005 [P] Create inference config directory placeholders in `configs/inference/.gitkeep`
+- [X] T006 [P] Create advanced experiment config placeholder in `configs/experiments/advanced_smoke.yaml`
+- [X] T007 Add optional dependency groups for notebook/model/fine-tuning/speech/quantization without enabling them in default CI in `pyproject.toml`
+- [X] T008 Add or update generated artifact ignore rules for model caches, checkpoints, generated speech, LoRA runs, and quantized runs in `.gitignore`
+- [X] T009 Add normal CI guard comments that real model downloads are forbidden in `.github/workflows/ci.yml`
+- [X] T010 [P] Add manual GPU benchmark workflow skeleton using `workflow_dispatch` in `.github/workflows/gpu-benchmarks.yml`
 
 **Checkpoint**: Shared paths and CI resource boundaries are documented before feature implementation begins.
 

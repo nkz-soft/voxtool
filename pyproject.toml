@@ -31,6 +31,36 @@ dev = [
     "types-jsonschema>=4.25.1",
 ]
 
+# Optional, heavyweight dependency groups for the advanced benchmark phases.
+#
+# IMPORTANT: These groups are intentionally NOT included in `dev` and MUST NOT be
+# installed by ordinary CI (`make install` installs only the default + `dev`
+# groups). Ordinary CI stays lightweight and mock/fixture-based: no real model
+# downloads, no GPU. Install a group manually for local or manual GPU workflows,
+# e.g. `uv sync --group model` or `uv sync --group finetuning`.
+notebook = [
+    "jupyter>=1.1.0",
+    "notebook>=7.2.0",
+]
+model = [
+    "accelerate>=1.0.0",
+    "huggingface-hub>=0.26.0",
+    "torch>=2.4.0",
+    "transformers>=4.45.0",
+]
+finetuning = [
+    "datasets>=3.0.0",
+    "peft>=0.13.0",
+    "trl>=0.11.0",
+]
+speech = [
+    "edge-tts>=6.1.0",
+    "piper-tts>=1.2.0",
+]
+quantization = [
+    "bitsandbytes>=0.44.0",
+]
+
 [tool.ruff]
 line-length = 88
 target-version = "py311"

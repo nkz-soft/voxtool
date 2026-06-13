@@ -1,6 +1,13 @@
-.PHONY: install lint typecheck test benchmark-smoke
+.PHONY: install install-advanced lint typecheck test benchmark-smoke
 
+# Default (and CI) install: base deps + dev tooling only. The optional advanced
+# groups (notebook/model/finetuning/speech/quantization) are intentionally
+# excluded so ordinary CI stays lightweight and never downloads real models.
 install:
+	uv sync --group dev
+
+# Manual / local install for heavyweight advanced workflows. Not used by CI.
+install-advanced:
 	uv sync --all-groups
 
 lint:
