@@ -21,13 +21,16 @@ def test_notebook_is_valid_nbformat() -> None:
 def test_notebook_documents_required_demo_steps() -> None:
     text = "\n".join(_sources()).lower()
 
-    # Dependency install, repo load, adapter selection, text run, optional audio,
-    # validation, execution, final answer, and metrics must all be present.
+    # Dependency install, repo load, adapter selection, text run, generated
+    # audio, validation, execution, final answer, and metrics must all be
+    # present.
     assert "pip install" in text
     assert "git clone" in text
     assert "select_adapter" in text
     assert "run_text_demo" in text
-    assert "files.upload" in text
+    # Audio examples are generated from text, not uploaded.
+    assert "synthesize_demo_audio" in text
+    assert "files.upload" not in text
     assert "validation" in text
     assert "final_answer" in text or "final answer" in text
     assert "metric" in text

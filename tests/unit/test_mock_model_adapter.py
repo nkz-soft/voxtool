@@ -12,6 +12,35 @@ def test_mock_model_adapter_returns_valid_tool_output() -> None:
     assert '"to_unit": "meter"' in output.raw_output
 
 
+def test_mock_model_adapter_handles_russian_conversion() -> None:
+    adapter = MockModelAdapter()
+
+    output = adapter.generate_text("Сконвертируй 2 километра в метры.")
+
+    assert '"needs_tool": true' in output.raw_output
+    assert '"from_unit": "kilometer"' in output.raw_output
+    assert '"to_unit": "meter"' in output.raw_output
+    assert '"value": 2' in output.raw_output
+
+
+def test_mock_model_adapter_maps_russian_mass_units() -> None:
+    adapter = MockModelAdapter()
+
+    output = adapter.generate_text("Переведи 500 граммов в килограммы.")
+
+    assert '"from_unit": "gram"' in output.raw_output
+    assert '"to_unit": "kilogram"' in output.raw_output
+
+
+def test_mock_model_adapter_russian_question_needs_no_tool() -> None:
+    adapter = MockModelAdapter()
+
+    output = adapter.generate_text("Какая столица Франции?")
+
+    assert '"needs_tool": false' in output.raw_output
+    assert '"tool_call": null' in output.raw_output
+
+
 def test_mock_model_adapter_returns_no_tool_output() -> None:
     adapter = MockModelAdapter()
 
