@@ -85,9 +85,7 @@ class MockModelAdapter:
             from_unit = _russian_unit(match.group("from_unit"))
             to_unit = _russian_unit(match.group("to_unit"))
             if from_unit is not None and to_unit is not None:
-                return _normalize_conversion(
-                    match.group("value"), from_unit, to_unit
-                )
+                return _normalize_conversion(match.group("value"), from_unit, to_unit)
         return None
 
     def _final_answer(self, value: float, from_unit: str, to_unit: str) -> str:
