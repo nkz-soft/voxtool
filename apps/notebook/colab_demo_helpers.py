@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -54,6 +55,42 @@ def select_adapter(
     No model is downloaded here; real weights load lazily on the first text run.
     """
     return build_adapter(adapter_id, config_path=config_path)
+
+
+def login_huggingface(token: str | None = None) -> str | None:
+    """Authenticate with Hugging Face so gated models (Gemma, Voxtral) download.
+
+    Pass a token explicitly (e.g. from Kaggle/Colab secrets) or leave it ``None``
+    to read ``HF_TOKEN``/``HUGGING_FACE_HUB_TOKEN`` from the environment. The
+    token is exported to the environment so the real adapters pick it up on their
+    next ``from_pretrained`` call, and a ``huggingface_hub.login`` is attempted so
+    the CLI cache is populated too. Returns the authenticated username when it can
+    be resolved.
+
+    Note: a valid token is necessary but not sufficient for gated models — you
+    must also have accepted the model's license and been granted access on its
+    Hugging Face page (otherwise the download fails with HTTP 401).
+    """
+    token = (
+        token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    )
+    if not token:
+        raise ValueError(
+            "No Hugging Face token provided; pass token=... or set the "
+            "HF_TOKEN environment variable."
+        )
+    # Export under both names the Hugging Face stack reads, so adapters that call
+    # from_pretrained pick the token up even without an interactive login.
+    os.environ["HF_TOKEN"] = token
+    os.environ["HUGGING_FACE_HUB_TOKEN"] = token
+
+    from huggingface_hub import login, whoami
+
+    login(token=token, add_to_git_credential=False)
+    try:
+        return str(whoami(token=token).get("name"))
+    except Exception:  # noqa: BLE001 - whoami is best-effort confirmation only
+        return None
 
 
 def text_examples(prompts: list[str]) -> list[BenchmarkExample]:

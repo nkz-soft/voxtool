@@ -1,10 +1,28 @@
 from __future__ import annotations
 
+import os
 from typing import Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field
 
 Pipeline = Literal["A", "C", "D"]
+
+# Environment variables that may carry a Hugging Face access token, in priority
+# order. Real adapters pass the resolved token to ``from_pretrained`` so gated
+# models (e.g. Gemma, Voxtral) can be downloaded in Colab/Kaggle without an
+# interactive login. ``None`` lets ``transformers`` fall back to any cached
+# ``huggingface_hub.login`` token.
+_HF_TOKEN_ENV_VARS: tuple[str, ...] = ("HF_TOKEN", "HUGGING_FACE_HUB_TOKEN")
+
+
+def resolve_hf_token() -> str | None:
+    """Return a Hugging Face token from the environment, or None if unset."""
+    for name in _HF_TOKEN_ENV_VARS:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return None
+
 
 # Capability flags each pipeline requires from an adapter before it may run.
 # Pipeline A is text-in/tool-call-out, Pipeline C is audio-in with transcript and

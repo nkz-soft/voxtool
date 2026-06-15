@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from packages.model_runner.adapters.base import AdapterCapabilities, ModelResponse
+from packages.model_runner.adapters.base import (
+    AdapterCapabilities,
+    ModelResponse,
+    resolve_hf_token,
+)
 
 
 class VoxtralAdapter:
@@ -67,8 +71,12 @@ class VoxtralAdapter:
         # are intentionally absent from ordinary CI.
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        model = AutoModelForCausalLM.from_pretrained(self._model_name)
+        # Pass an HF token (from HF_TOKEN/HUGGING_FACE_HUB_TOKEN) so gated models
+        # like Voxtral download without an interactive login; None falls back to
+        # any cached huggingface_hub.login token.
+        token = resolve_hf_token()
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name, token=token)
+        model = AutoModelForCausalLM.from_pretrained(self._model_name, token=token)
         self._runtime = (tokenizer, model)
         return self._runtime
 

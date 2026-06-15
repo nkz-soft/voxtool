@@ -92,7 +92,7 @@ files = ["apps", "packages", "scripts", "tests"]
 # are imported lazily inside real adapters. Ignore their missing stubs so the
 # import-safe adapters still typecheck without the `model` group installed.
 [[tool.mypy.overrides]]
-module = ["transformers.*"]
+module = ["transformers.*", "huggingface_hub.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
