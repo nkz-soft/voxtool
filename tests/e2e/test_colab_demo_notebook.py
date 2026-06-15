@@ -34,6 +34,10 @@ def test_notebook_documents_required_demo_steps() -> None:
     assert "validation" in text
     assert "final_answer" in text or "final answer" in text
     assert "metric" in text
+    # Every model is compared across all four pipelines (A-D) on the same data.
+    assert "compare_pipelines" in text
+    for pipeline in ("a", "b", "c", "d"):
+        assert f"**{pipeline}**" in text
 
 
 def test_notebook_does_not_eagerly_download_real_model() -> None:

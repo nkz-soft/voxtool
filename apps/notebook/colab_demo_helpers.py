@@ -6,6 +6,7 @@ from typing import Any
 
 import pandas as pd
 from packages.dataset_builder.models import BenchmarkExample, Language
+from packages.metrics.aggregation import summarize_metrics
 from packages.metrics.tool_use import (
     ToolUseEvaluation,
     confusion_matrix,
@@ -24,6 +25,7 @@ from packages.model_runner.registry import available_adapters, build_adapter
 from packages.pipeline_runner.artifacts import PipelineRunRecord
 from packages.pipeline_runner.capabilities import check_adapter_for_pipeline
 from packages.pipeline_runner.pipeline_a import run_pipeline_a
+from packages.pipeline_runner.pipeline_b import run_pipeline_b
 from packages.pipeline_runner.pipeline_c import run_pipeline_c
 from packages.pipeline_runner.pipeline_d import run_pipeline_d
 from packages.pipeline_runner.runner import _AdapterBridge
@@ -300,8 +302,13 @@ def demo_mock_adapter() -> MockModelAdapter:
 def _metrics_from_evaluations(
     evaluations: Sequence[ToolUseEvaluation],
 ) -> dict[str, Any]:
-    """Aggregate one set of evaluations into the demo's metric fields."""
+    """Aggregate one set of evaluations into the demo's metric fields.
+
+    ``wer`` is the mean word error rate over records that carry a transcript
+    (audio pipelines B and D); it is ``None`` for text-only runs.
+    """
     matrix = confusion_matrix(evaluations)
+    wer_values = [item.wer for item in evaluations if item.wer is not None]
     return {
         "examples": len(evaluations),
         "parsable_rate": parsability_rate(evaluations),
@@ -310,6 +317,7 @@ def _metrics_from_evaluations(
         "precision": precision(matrix),
         "recall": recall(matrix),
         "false_alarm_rate": false_alarm_rate(matrix),
+        "wer": sum(wer_values) / len(wer_values) if wer_values else None,
     }
 
 
@@ -396,6 +404,152 @@ def compare_models(
         except Exception as exc:  # noqa: BLE001 - surface failures in the table
             rows.append({"model": adapter_id, "error": f"{type(exc).__name__}: {exc}"})
     return records_by_model, pd.DataFrame(rows)
+
+
+# The four benchmark pipelines, each over the same data:
+#   A: text in -> JSON tool-call envelope out
+#   B: audio in -> ASR transcript out (WER vs the reference transcript)
+#   C: audio in -> direct audio tool-call envelope out
+#   D: audio in -> ASR transcript then text-LLM tool-call envelope out
+ALL_PIPELINES: tuple[str, ...] = ("A", "B", "C", "D")
+
+
+def run_all_pipelines(
+    adapter: ModelAdapter,
+    dataset: Sequence[BenchmarkExample],
+    audio_examples: Sequence[AudioExample],
+    *,
+    run_prefix: str = "colab-pipelines",
+    asr_adapter: ASRAdapter | None = None,
+) -> tuple[dict[str, list[PipelineRunRecord]], dict[str, str]]:
+    """Run pipelines A-D for one adapter over the same data.
+
+    Returns ``(records_by_pipeline, skips)`` where ``skips`` maps a pipeline
+    letter to the reason the adapter could not serve it (e.g. Pipeline C needs
+    audio input, which only Voxtral declares). Pipeline B is ASR-only and so is
+    model-independent in the current stack: it uses ``asr_adapter`` (a mock by
+    default) and reports transcription WER that pipelines C and D build on.
+    """
+    registry = default_tool_registry()
+    executor = ToolExecutor(registry)
+    bridge = _AdapterBridge(adapter)
+    asr = asr_adapter or MockASRAdapter()
+    records: dict[str, list[PipelineRunRecord]] = {}
+    skips: dict[str, str] = {}
+
+    skip_a = check_adapter_for_pipeline(adapter, "A")
+    if skip_a is not None:
+        skips["A"] = skip_a.reason
+    else:
+        records["A"] = run_pipeline_a(
+            list(dataset),
+            run_id=f"{run_prefix}-A",
+            model_adapter=bridge,
+            registry=registry,
+            executor=executor,
+        )
+
+    # Pipeline B is pure ASR; it does not consult the tool-calling adapter.
+    records["B"] = run_pipeline_b(
+        list(audio_examples),
+        run_id=f"{run_prefix}-B",
+        asr_adapter=asr,
+    )
+
+    skip_c = check_adapter_for_pipeline(adapter, "C")
+    if skip_c is not None:
+        skips["C"] = skip_c.reason
+    else:
+        records["C"] = run_pipeline_c(
+            list(audio_examples),
+            run_id=f"{run_prefix}-C",
+            model_adapter=bridge,
+            registry=registry,
+            executor=executor,
+        )
+
+    skip_d = check_adapter_for_pipeline(adapter, "D")
+    if skip_d is not None:
+        skips["D"] = skip_d.reason
+    else:
+        records["D"] = run_pipeline_d(
+            list(audio_examples),
+            run_id=f"{run_prefix}-D",
+            asr_adapter=asr,
+            text_adapter=bridge,
+            registry=registry,
+            executor=executor,
+        )
+
+    return records, skips
+
+
+def compare_pipelines(
+    adapter_ids: Sequence[str],
+    dataset: Sequence[BenchmarkExample] | None = None,
+    *,
+    run_prefix: str = "colab-pipelines",
+    config_paths: dict[str, str | Path] | None = None,
+    audio_dir: str | Path = "demo_audio",
+) -> tuple[dict[str, dict[str, list[PipelineRunRecord]]], pd.DataFrame, pd.DataFrame]:
+    """Run every model across pipelines A-D on the same data and compare metrics.
+
+    Synthesizes the audio once from ``dataset`` (defaults to the bilingual
+    :func:`demo_dataset`) so all models and pipelines see identical inputs, then
+    for each adapter runs every supported pipeline and aggregates per-pipeline
+    metrics with the shared :func:`summarize_metrics`. Tool metrics apply to
+    A/C/D, WER to B/D, and a modality gap compares each audio pipeline with the
+    Pipeline A text baseline.
+
+    Returns ``(records_by_model, comparison, skips)``:
+
+    - ``records_by_model``: ``{model: {pipeline: records}}`` for inspection.
+    - ``comparison``: one row per (model, pipeline, split, language); filter to
+      ``split == "all"`` for the headline numbers.
+    - ``skips``: rows describing pipelines a model could not run (with the
+      reason), and any adapter that failed to build or run.
+    """
+    dataset = list(dataset) if dataset is not None else demo_dataset()
+    config_paths = config_paths or {}
+    audio_examples = synthesize_demo_audio(dataset, output_dir=audio_dir)
+
+    records_by_model: dict[str, dict[str, list[PipelineRunRecord]]] = {}
+    frames: list[pd.DataFrame] = []
+    skip_rows: list[dict[str, Any]] = []
+    for adapter_id in adapter_ids:
+        try:
+            adapter = select_adapter(
+                adapter_id, config_path=config_paths.get(adapter_id)
+            )
+            records, skips = run_all_pipelines(
+                adapter,
+                dataset,
+                audio_examples,
+                run_prefix=f"{run_prefix}-{adapter_id}",
+            )
+            records_by_model[adapter_id] = records
+            if records:
+                summary = summarize_metrics(
+                    dataset=dataset, records_by_pipeline=records
+                )
+                summary.insert(0, "model", adapter_id)
+                frames.append(summary)
+            for pipeline, reason in skips.items():
+                skip_rows.append(
+                    {"model": adapter_id, "pipeline": pipeline, "skip": reason}
+                )
+        except Exception as exc:  # noqa: BLE001 - surface failures in the table
+            skip_rows.append(
+                {
+                    "model": adapter_id,
+                    "pipeline": "*",
+                    "skip": f"{type(exc).__name__}: {exc}",
+                }
+            )
+
+    comparison = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+    skips_df = pd.DataFrame(skip_rows, columns=["model", "pipeline", "skip"])
+    return records_by_model, comparison, skips_df
 
 
 def record_summary(record: PipelineRunRecord) -> dict[str, Any]:
