@@ -43,7 +43,7 @@ jobs:
     # Runner is selectable at dispatch time so a self-hosted GPU runner can be used.
     runs-on: ${{ inputs.runner_label }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
       - name: Set up Python
         uses: actions/setup-python@v6
