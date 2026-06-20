@@ -59,7 +59,7 @@ model = [
     "transformers>=4.45.0",
 ]
 finetuning = [
-    "datasets>=3.0.0",
+    "datasets>=5.0.0",
     "peft>=0.13.0",
     "trl>=0.11.0",
 ]
