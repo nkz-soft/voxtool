@@ -6,6 +6,7 @@ from packages.model_runner.adapters.base import (
     AdapterCapabilities,
     ModelResponse,
     cuda_is_available,
+    generated_token_ids,
     move_inputs_to_runtime_device,
     real_model_load_kwargs,
     resolve_hf_token,
@@ -72,18 +73,18 @@ class VoxtralAdapter:
             )
         # Lazy import: heavy dependencies are only needed for real inference and
         # are intentionally absent from ordinary CI.
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoProcessor, VoxtralForConditionalGeneration
 
         # Pass an HF token (from HF_TOKEN/HUGGING_FACE_HUB_TOKEN) so gated models
         # like Voxtral download without an interactive login; None falls back to
         # any cached huggingface_hub.login token. On GPU runtimes, load with
         # Accelerate's automatic device map so Kaggle/Colab CUDA is used.
         token = resolve_hf_token()
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name, token=token)
-        model = AutoModelForCausalLM.from_pretrained(
+        processor = AutoProcessor.from_pretrained(self._model_name, token=token)
+        model = VoxtralForConditionalGeneration.from_pretrained(
             self._model_name, **real_model_load_kwargs()
         )
-        self._runtime = (tokenizer, model)
+        self._runtime = (processor, model)
         return self._runtime
 
     def generate_text(
@@ -95,18 +96,32 @@ class VoxtralAdapter:
         the returned ``raw_output`` is exactly what the model produced.
         """
         try:
-            tokenizer, model = self._load_runtime()
+            processor, model = self._load_runtime()
         except Exception as exc:  # noqa: BLE001 - surface load failures as data
             return ModelResponse(error=f"voxtral load failed: {exc}")
 
         options = {**self._generation, **(config or {})}
-        inputs = tokenizer(prompt, return_tensors="pt")
+        if hasattr(processor, "apply_chat_template"):
+            messages = [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ]
+            inputs = processor.apply_chat_template(
+                messages,
+                return_tensors="pt",
+                return_dict=True,
+            )
+        else:
+            inputs = processor(prompt, return_tensors="pt")
         inputs = move_inputs_to_runtime_device(inputs)
         outputs = model.generate(**inputs, **options)
         output_ids = outputs[0]
         if hasattr(output_ids, "detach"):
             output_ids = output_ids.detach().cpu()
-        text = tokenizer.decode(output_ids, skip_special_tokens=True)
+        completion_ids = generated_token_ids(output_ids, inputs)
+        text = processor.decode(completion_ids, skip_special_tokens=True)
         return ModelResponse(
             raw_output=text,
             metadata={

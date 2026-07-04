@@ -6,6 +6,7 @@ from packages.model_runner.adapters.base import (
     AdapterCapabilities,
     ModelResponse,
     cuda_is_available,
+    generated_token_ids,
     move_inputs_to_runtime_device,
     real_model_load_kwargs,
     resolve_hf_token,
@@ -105,7 +106,8 @@ class QwenAdapter:
         output_ids = outputs[0]
         if hasattr(output_ids, "detach"):
             output_ids = output_ids.detach().cpu()
-        text = tokenizer.decode(output_ids, skip_special_tokens=True)
+        completion_ids = generated_token_ids(output_ids, inputs)
+        text = tokenizer.decode(completion_ids, skip_special_tokens=True)
         return ModelResponse(
             raw_output=text,
             metadata={

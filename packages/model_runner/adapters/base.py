@@ -53,6 +53,63 @@ def move_inputs_to_runtime_device(inputs: Any) -> Any:
     return inputs
 
 
+def generated_token_ids(output_ids: Any, inputs: Any) -> Any:
+    """Return only tokens generated after the prompt prefix.
+
+    Decoder-only Transformers models return the full prompt plus completion from
+    ``generate``. Benchmark artifacts need the model completion only, otherwise
+    strict JSON parsing sees the prompt instructions before the JSON envelope.
+    """
+    prompt_length = _input_token_count(inputs)
+    if prompt_length == 0:
+        return output_ids
+    try:
+        return output_ids[prompt_length:]
+    except Exception:  # noqa: BLE001 - support tensor/list-like outputs broadly
+        return output_ids
+
+
+def _input_token_count(inputs: Any) -> int:
+    input_ids = _input_ids(inputs)
+    if input_ids is None:
+        return 0
+
+    shape = getattr(input_ids, "shape", None)
+    if shape is not None and len(shape) >= 1:
+        return int(shape[-1])
+
+    size = getattr(input_ids, "size", None)
+    if callable(size):
+        try:
+            return int(size(-1))
+        except Exception:  # noqa: BLE001 - fall through to sequence handling
+            pass
+
+    try:
+        first_sequence = input_ids[0]
+    except Exception:  # noqa: BLE001 - final fallback for flat token sequences
+        try:
+            return len(input_ids)
+        except Exception:  # noqa: BLE001
+            return 0
+
+    try:
+        return len(first_sequence)
+    except Exception:  # noqa: BLE001
+        return 0
+
+
+def _input_ids(inputs: Any) -> Any | None:
+    if isinstance(inputs, dict):
+        return inputs.get("input_ids")
+    if hasattr(inputs, "get"):
+        try:
+            return inputs.get("input_ids")
+        except Exception:  # noqa: BLE001
+            pass
+    return getattr(inputs, "input_ids", None)
+
+
 # Capability flags each pipeline requires from an adapter before it may run.
 # Pipeline A is text-in/tool-call-out, Pipeline C is audio-in with transcript and
 # tool-call output, and Pipeline D consumes an external transcript so the adapter
