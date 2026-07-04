@@ -65,6 +65,33 @@ class _FakeProcessor(_FakeTokenizer):
         return {"input_ids": [[30, 31, 32]]}
 
 
+class _FakeProcessorWithoutTemplate(_FakeTokenizer):
+    fallback_called = False
+
+    def __call__(
+        self, prompt: str, *, return_tensors: str
+    ) -> dict[str, list[list[int]]]:
+        assert prompt == "prompt"
+        assert return_tensors == "pt"
+        self.fallback_called = True
+        return {"input_ids": [[30, 31, 32]]}
+
+    def apply_chat_template(
+        self,
+        messages: list[dict[str, object]],
+        *,
+        return_tensors: str,
+        return_dict: bool,
+    ) -> dict[str, list[list[int]]]:
+        assert messages[0]["role"] == "user"
+        assert return_tensors == "pt"
+        assert return_dict is True
+        raise ValueError(
+            "Cannot use chat template functions because "
+            "tokenizer.chat_template is not set"
+        )
+
+
 class _FakeVoxtralModel:
     from_pretrained_called = False
 
@@ -168,3 +195,16 @@ def test_voxtral_uses_conditional_generation_and_decodes_completion(
     assert processor.chat_template_called
     assert processor.decoded_ids == [40, 41]
     assert _FakeVoxtralModel.from_pretrained_called
+
+
+def test_voxtral_falls_back_when_chat_template_is_missing() -> None:
+    processor = _FakeProcessorWithoutTemplate()
+    adapter = VoxtralAdapter(model_name="dummy/voxtral")
+    adapter._runtime = (processor, _FakeVoxtralModel())
+
+    response = adapter.generate_text("prompt")
+
+    assert response.error is None
+    assert response.raw_output == "completion-json"
+    assert processor.fallback_called
+    assert processor.decoded_ids == [40, 41]

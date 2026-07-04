@@ -96,6 +96,27 @@ class VoxtralAdapter:
         release_runtime_objects(self._runtime)
         self._runtime = None
 
+    def _tokenize_text_prompt(self, processor: Any, prompt: str) -> Any:
+        """Tokenize a text prompt, falling back when no chat template is set."""
+        if hasattr(processor, "apply_chat_template"):
+            messages = [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ]
+            try:
+                return processor.apply_chat_template(
+                    messages,
+                    return_tensors="pt",
+                    return_dict=True,
+                )
+            except ValueError as exc:
+                if "chat_template" not in str(exc):
+                    raise
+
+        return processor(prompt, return_tensors="pt")
+
     def generate_text(
         self, prompt: str, config: dict[str, Any] | None = None
     ) -> ModelResponse:
@@ -111,20 +132,7 @@ class VoxtralAdapter:
             return ModelResponse(error=f"voxtral load failed: {exc}")
 
         options = {**self._generation, **(config or {})}
-        if hasattr(processor, "apply_chat_template"):
-            messages = [
-                {
-                    "role": "user",
-                    "content": [{"type": "text", "text": prompt}],
-                }
-            ]
-            inputs = processor.apply_chat_template(
-                messages,
-                return_tensors="pt",
-                return_dict=True,
-            )
-        else:
-            inputs = processor(prompt, return_tensors="pt")
+        inputs = self._tokenize_text_prompt(processor, prompt)
         inputs = move_inputs_to_runtime_device(inputs)
         outputs = model.generate(**inputs, **options)
         output_ids = outputs[0]
