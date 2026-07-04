@@ -20,7 +20,7 @@
       ]
     },
     "final_answer": {
-      "type": "string",
+      "type": ["string", "null"],
       "minLength": 1
     },
     "transcript": {

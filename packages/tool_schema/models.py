@@ -43,7 +43,7 @@ class ModelOutputEnvelope(BaseModel):
 
     needs_tool: bool
     tool_call: ToolInvocation | None
-    final_answer: str = Field(min_length=1)
+    final_answer: str | None = Field(min_length=1)
     transcript: str | None = None
 
     @model_validator(mode="after")

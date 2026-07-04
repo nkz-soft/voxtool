@@ -7,6 +7,8 @@ Available tools:
 
 Return JSON only with keys `needs_tool`, `tool_call`, `final_answer`, and `transcript`.
 If the audio asks for a conversion, use exactly one registered tool call.
+The `tool_call` object must use keys `tool` and `arguments`.
+When a tool is needed, `final_answer` may be null.
 If no tool is needed, set `needs_tool` to false and `tool_call` to null.
 
 Audio content:

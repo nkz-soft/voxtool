@@ -38,6 +38,24 @@ def test_json_schema_accepts_valid_tool_envelope() -> None:
     )
 
 
+def test_json_schema_accepts_null_final_answer_for_tool_envelope() -> None:
+    validate_model_output(
+        {
+            "needs_tool": True,
+            "tool_call": {
+                "tool": "units.convert",
+                "arguments": {
+                    "value": 2,
+                    "from_unit": "kilogram",
+                    "to_unit": "gram",
+                },
+            },
+            "final_answer": None,
+        },
+        schema=load_model_output_schema(SPEC_SCHEMA_PATH),
+    )
+
+
 def test_json_schema_accepts_unknown_tool_name_for_registry_validation() -> None:
     validate_model_output(
         {
