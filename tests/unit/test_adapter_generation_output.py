@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import os
 import sys
 from types import ModuleType
 from typing import Any
 
-from packages.model_runner.adapters.base import generated_token_ids
+from packages.model_runner.adapters.base import (
+    clear_cuda_memory,
+    generated_token_ids,
+    release_runtime_objects,
+)
 from packages.model_runner.adapters.gemma import GemmaAdapter
 from packages.model_runner.adapters.qwen import QwenAdapter
 from packages.model_runner.adapters.voxtral import VoxtralAdapter
@@ -74,6 +79,14 @@ class _FakeVoxtralModel:
         return [[30, 31, 32, 40, 41]]
 
 
+class _FakeRuntimeModel:
+    def __init__(self) -> None:
+        self.cpu_called = False
+
+    def cpu(self) -> None:
+        self.cpu_called = True
+
+
 def test_generated_token_ids_removes_prompt_prefix_from_mapping_inputs() -> None:
     output_ids = [10, 11, 12, 20, 21]
     inputs = {"input_ids": [[10, 11, 12]]}
@@ -92,6 +105,24 @@ def test_generated_token_ids_keeps_output_when_prompt_length_is_unknown() -> Non
     output_ids = [20, 21]
 
     assert generated_token_ids(output_ids, object()) == output_ids
+
+
+def test_release_runtime_objects_moves_cached_model_to_cpu() -> None:
+    model = _FakeRuntimeModel()
+
+    release_runtime_objects((_FakeTokenizer(), model))
+
+    assert model.cpu_called
+
+
+def test_clear_cuda_memory_sets_fragmentation_allocator_config(
+    monkeypatch: Any,
+) -> None:
+    monkeypatch.delenv("PYTORCH_CUDA_ALLOC_CONF", raising=False)
+
+    clear_cuda_memory()
+
+    assert "expandable_segments:True" in os.environ["PYTORCH_CUDA_ALLOC_CONF"]
 
 
 def test_qwen_generate_text_decodes_only_generated_tokens() -> None:

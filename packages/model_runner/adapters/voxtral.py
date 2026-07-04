@@ -5,10 +5,13 @@ from typing import Any
 from packages.model_runner.adapters.base import (
     AdapterCapabilities,
     ModelResponse,
+    clear_cuda_memory,
     cuda_is_available,
     generated_token_ids,
     move_inputs_to_runtime_device,
     real_model_load_kwargs,
+    release_adapter_resources,
+    release_runtime_objects,
     resolve_hf_token,
 )
 
@@ -71,6 +74,7 @@ class VoxtralAdapter:
                 "VoxtralAdapter requires a 'model_name' before generation; "
                 "set it in configs/models/voxtral.yaml."
             )
+        clear_cuda_memory()
         # Lazy import: heavy dependencies are only needed for real inference and
         # are intentionally absent from ordinary CI.
         from transformers import AutoProcessor, VoxtralForConditionalGeneration
@@ -89,6 +93,7 @@ class VoxtralAdapter:
 
     def unload_runtime(self) -> None:
         """Drop cached processor/model objects so GPU memory can be reclaimed."""
+        release_runtime_objects(self._runtime)
         self._runtime = None
 
     def generate_text(
@@ -102,6 +107,7 @@ class VoxtralAdapter:
         try:
             processor, model = self._load_runtime()
         except Exception as exc:  # noqa: BLE001 - surface load failures as data
+            release_adapter_resources(self)
             return ModelResponse(error=f"voxtral load failed: {exc}")
 
         options = {**self._generation, **(config or {})}

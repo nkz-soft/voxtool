@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gc
 import os
+from contextlib import suppress
 from importlib import import_module
 from typing import Any, Literal, Protocol, runtime_checkable
 
@@ -15,6 +16,7 @@ Pipeline = Literal["A", "C", "D"]
 # interactive login. ``None`` lets ``transformers`` fall back to any cached
 # ``huggingface_hub.login`` token.
 _HF_TOKEN_ENV_VARS: tuple[str, ...] = ("HF_TOKEN", "HUGGING_FACE_HUB_TOKEN")
+_DEFAULT_CUDA_ALLOC_CONF = "expandable_segments:True"
 
 
 def resolve_hf_token() -> str | None:
@@ -32,6 +34,7 @@ def cuda_is_available() -> bool:
     Heavy model dependencies are optional in CI, so this helper imports torch
     lazily and treats missing torch as no CUDA support.
     """
+    _configure_cuda_allocator()
     try:
         torch = import_module("torch")
     except Exception:  # noqa: BLE001 - torch is optional outside real runs
@@ -121,6 +124,21 @@ def release_adapter_resources(adapter: object) -> None:
     unload = getattr(adapter, "unload_runtime", None)
     if callable(unload):
         unload()
+    clear_cuda_memory()
+
+
+def release_runtime_objects(runtime: object) -> None:
+    """Move cached runtime objects off GPU before their references are dropped."""
+    if isinstance(runtime, tuple | list | set):
+        for item in runtime:
+            _move_runtime_object_to_cpu(item)
+    elif runtime is not None:
+        _move_runtime_object_to_cpu(runtime)
+
+
+def clear_cuda_memory() -> None:
+    """Collect Python garbage and clear PyTorch CUDA allocator caches."""
+    _configure_cuda_allocator()
     gc.collect()
 
     try:
@@ -140,6 +158,25 @@ def release_adapter_resources(adapter: object) -> None:
     ipc_collect = getattr(cuda, "ipc_collect", None)
     if callable(ipc_collect):
         ipc_collect()
+
+
+def _configure_cuda_allocator() -> None:
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", _DEFAULT_CUDA_ALLOC_CONF)
+
+
+def _move_runtime_object_to_cpu(item: object) -> None:
+    cpu = getattr(item, "cpu", None)
+    if callable(cpu):
+        try:
+            cpu()
+            return
+        except Exception:  # noqa: BLE001 - best-effort cleanup
+            pass
+
+    to = getattr(item, "to", None)
+    if callable(to):
+        with suppress(Exception):
+            to("cpu")
 
 
 # Capability flags each pipeline requires from an adapter before it may run.
