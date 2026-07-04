@@ -110,6 +110,36 @@ def _input_ids(inputs: Any) -> Any | None:
     return getattr(inputs, "input_ids", None)
 
 
+def release_adapter_resources(adapter: object) -> None:
+    """Release cached adapter runtime objects and clear PyTorch CUDA cache.
+
+    Real adapters keep their loaded model/tokenizer pair on ``_runtime`` so a
+    single adapter can serve many examples without reloading weights. Comparison
+    runs that move to the next adapter should call this to free GPU memory.
+    """
+    unload = getattr(adapter, "unload_runtime", None)
+    if callable(unload):
+        unload()
+
+    try:
+        torch = import_module("torch")
+    except Exception:  # noqa: BLE001 - torch is optional outside real runs
+        return
+
+    cuda = getattr(torch, "cuda", None)
+    is_available = getattr(cuda, "is_available", None)
+    if not callable(is_available) or not is_available():
+        return
+
+    empty_cache = getattr(cuda, "empty_cache", None)
+    if callable(empty_cache):
+        empty_cache()
+
+    ipc_collect = getattr(cuda, "ipc_collect", None)
+    if callable(ipc_collect):
+        ipc_collect()
+
+
 # Capability flags each pipeline requires from an adapter before it may run.
 # Pipeline A is text-in/tool-call-out, Pipeline C is audio-in with transcript and
 # tool-call output, and Pipeline D consumes an external transcript so the adapter

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from apps.notebook.colab_demo_helpers import (
+    compare_models,
     demo_dataset,
     run_all_pipelines,
     run_text_demo,
@@ -15,6 +17,15 @@ from packages.tool_schema.providers import ToolExecutor
 from packages.tool_schema.units import default_tool_registry
 
 FIXTURE = Path("data/fixtures/advanced/sample_text.jsonl")
+
+
+class _ReleasableMockAdapter(MockModelAdapter):
+    def __init__(self) -> None:
+        super().__init__(adapter_id="qwen")
+        self.unloaded = False
+
+    def unload_runtime(self) -> None:
+        self.unloaded = True
 
 
 def test_mock_adapter_runs_pipeline_a_through_bridge(tmp_path: Path) -> None:
@@ -68,6 +79,32 @@ def test_run_benchmark_mock_pipeline_a_preserves_artifacts(tmp_path: Path) -> No
     assert all(r.model_adapter == "MockModelAdapter" for r in reloaded)
 
 
+def test_run_benchmark_releases_real_adapter_runtime(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = tmp_path / "run.jsonl"
+    registry = default_tool_registry()
+    adapter = _ReleasableMockAdapter()
+
+    monkeypatch.setattr(
+        "packages.pipeline_runner.runner.build_adapter",
+        lambda *_args, **_kwargs: adapter,
+    )
+
+    run_benchmark(
+        pipeline="A",
+        dataset_path=FIXTURE,
+        output_path=output,
+        run_id="real-run",
+        registry=registry,
+        executor=ToolExecutor(registry),
+        model="qwen",
+        limit=1,
+    )
+
+    assert adapter.unloaded
+
+
 def test_run_all_pipelines_can_exclude_pipeline_a(tmp_path: Path) -> None:
     dataset = demo_dataset()
     audio_examples = synthesize_demo_audio(dataset, output_dir=tmp_path / "audio")
@@ -82,3 +119,19 @@ def test_run_all_pipelines_can_exclude_pipeline_a(tmp_path: Path) -> None:
     assert set(records) == {"B", "D"}
     assert "A" not in records
     assert "A" not in skips
+
+
+def test_compare_models_releases_adapter_after_each_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    adapter = _ReleasableMockAdapter()
+
+    monkeypatch.setattr(
+        "apps.notebook.colab_demo_helpers.select_adapter",
+        lambda *_args, **_kwargs: adapter,
+    )
+
+    _records, comparison = compare_models(["qwen"], dataset=demo_dataset()[:1])
+
+    assert adapter.unloaded
+    assert comparison.loc[0, "model"] == "qwen"

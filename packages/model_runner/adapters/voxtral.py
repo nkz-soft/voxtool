@@ -87,6 +87,10 @@ class VoxtralAdapter:
         self._runtime = (processor, model)
         return self._runtime
 
+    def unload_runtime(self) -> None:
+        """Drop cached processor/model objects so GPU memory can be reclaimed."""
+        self._runtime = None
+
     def generate_text(
         self, prompt: str, config: dict[str, Any] | None = None
     ) -> ModelResponse:

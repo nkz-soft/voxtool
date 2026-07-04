@@ -19,7 +19,7 @@ from packages.metrics.tool_use import (
     tool_call_exact_match_rate,
     tool_decision_accuracy,
 )
-from packages.model_runner.adapters.base import ModelAdapter
+from packages.model_runner.adapters.base import ModelAdapter, release_adapter_resources
 from packages.model_runner.adapters.mock import MockModelAdapter
 from packages.model_runner.asr import ASRAdapter, MockASRAdapter
 from packages.model_runner.registry import available_adapters, build_adapter
@@ -424,6 +424,7 @@ def compare_models(
     records_by_model: dict[str, list[PipelineRunRecord]] = {}
     rows: list[dict[str, Any]] = []
     for adapter_id in adapter_ids:
+        adapter: ModelAdapter | None = None
         try:
             adapter = select_adapter(
                 adapter_id, config_path=config_paths.get(adapter_id)
@@ -440,6 +441,9 @@ def compare_models(
                 rows.append({"model": adapter_id, **entry, "error": None})
         except Exception as exc:  # noqa: BLE001 - surface failures in the table
             rows.append({"model": adapter_id, "error": f"{type(exc).__name__}: {exc}"})
+        finally:
+            if adapter is not None:
+                release_adapter_resources(adapter)
     return records_by_model, pd.DataFrame(rows)
 
 
@@ -565,6 +569,7 @@ def compare_pipelines(
     frames: list[pd.DataFrame] = []
     skip_rows: list[dict[str, Any]] = []
     for adapter_id in adapter_ids:
+        adapter: ModelAdapter | None = None
         try:
             adapter = select_adapter(
                 adapter_id, config_path=config_paths.get(adapter_id)
@@ -595,6 +600,9 @@ def compare_pipelines(
                     "skip": f"{type(exc).__name__}: {exc}",
                 }
             )
+        finally:
+            if adapter is not None:
+                release_adapter_resources(adapter)
 
     comparison = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     skips_df = pd.DataFrame(skip_rows, columns=["model", "pipeline", "skip"])

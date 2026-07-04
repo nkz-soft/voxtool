@@ -86,6 +86,10 @@ class GemmaAdapter:
         self._runtime = (tokenizer, model)
         return self._runtime
 
+    def unload_runtime(self) -> None:
+        """Drop cached tokenizer/model objects so GPU memory can be reclaimed."""
+        self._runtime = None
+
     def generate_text(
         self, prompt: str, config: dict[str, Any] | None = None
     ) -> ModelResponse:

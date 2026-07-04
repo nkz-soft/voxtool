@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import Literal
 
 from packages.dataset_builder.io import read_jsonl
-from packages.model_runner.adapters.base import ModelAdapter, ModelResponse
+from packages.model_runner.adapters.base import (
+    ModelAdapter,
+    ModelResponse,
+    release_adapter_resources,
+)
 from packages.model_runner.asr import MockASRAdapter
 from packages.model_runner.base import ModelOutput
 from packages.model_runner.mock import MockModelAdapter
@@ -87,61 +91,65 @@ def run_benchmark(
     else:
         text_adapter = MockModelAdapter()
 
-    if pipeline == "A":
-        examples = read_jsonl(dataset_path)
-        if limit is not None:
-            examples = examples[:limit]
+    try:
+        if pipeline == "A":
+            examples = read_jsonl(dataset_path)
+            if limit is not None:
+                examples = examples[:limit]
 
-        records = run_pipeline_a(
-            examples,
-            run_id=run_id,
-            model_adapter=text_adapter,  # type: ignore[arg-type]
-            registry=registry,
-            executor=executor,
-            output_path=None if use_real_adapter else output_path,
-        )
-    elif pipeline == "B":
-        audio_examples = read_audio_jsonl(dataset_path)
-        if limit is not None:
-            audio_examples = audio_examples[:limit]
+            records = run_pipeline_a(
+                examples,
+                run_id=run_id,
+                model_adapter=text_adapter,  # type: ignore[arg-type]
+                registry=registry,
+                executor=executor,
+                output_path=None if use_real_adapter else output_path,
+            )
+        elif pipeline == "B":
+            audio_examples = read_audio_jsonl(dataset_path)
+            if limit is not None:
+                audio_examples = audio_examples[:limit]
 
-        return run_pipeline_b(
-            audio_examples,
-            run_id=run_id,
-            asr_adapter=MockASRAdapter(),
-            output_path=output_path,
-        )
-    elif pipeline == "C":
-        audio_examples = read_audio_jsonl(dataset_path)
-        if limit is not None:
-            audio_examples = audio_examples[:limit]
+            records = run_pipeline_b(
+                audio_examples,
+                run_id=run_id,
+                asr_adapter=MockASRAdapter(),
+                output_path=output_path,
+            )
+        elif pipeline == "C":
+            audio_examples = read_audio_jsonl(dataset_path)
+            if limit is not None:
+                audio_examples = audio_examples[:limit]
 
-        records = run_pipeline_c(
-            audio_examples,
-            run_id=run_id,
-            model_adapter=text_adapter,  # type: ignore[arg-type]
-            registry=registry,
-            executor=executor,
-            output_path=None if use_real_adapter else output_path,
-        )
-    elif pipeline == "D":
-        audio_examples = read_audio_jsonl(dataset_path)
-        if limit is not None:
-            audio_examples = audio_examples[:limit]
+            records = run_pipeline_c(
+                audio_examples,
+                run_id=run_id,
+                model_adapter=text_adapter,  # type: ignore[arg-type]
+                registry=registry,
+                executor=executor,
+                output_path=None if use_real_adapter else output_path,
+            )
+        elif pipeline == "D":
+            audio_examples = read_audio_jsonl(dataset_path)
+            if limit is not None:
+                audio_examples = audio_examples[:limit]
 
-        records = run_pipeline_d(
-            audio_examples,
-            run_id=run_id,
-            asr_adapter=MockASRAdapter(),
-            text_adapter=text_adapter,  # type: ignore[arg-type]
-            registry=registry,
-            executor=executor,
-            output_path=None if use_real_adapter else output_path,
-        )
-    else:
-        raise ValueError(f"Unsupported pipeline: {pipeline}")
+            records = run_pipeline_d(
+                audio_examples,
+                run_id=run_id,
+                asr_adapter=MockASRAdapter(),
+                text_adapter=text_adapter,  # type: ignore[arg-type]
+                registry=registry,
+                executor=executor,
+                output_path=None if use_real_adapter else output_path,
+            )
+        else:
+            raise ValueError(f"Unsupported pipeline: {pipeline}")
 
-    if use_real_adapter and real_adapter is not None:
-        records = _enrich_with_adapter(records, real_adapter)
-        write_pipeline_jsonl(output_path, records)
-    return records
+        if use_real_adapter and real_adapter is not None:
+            records = _enrich_with_adapter(records, real_adapter)
+            write_pipeline_jsonl(output_path, records)
+        return records
+    finally:
+        if use_real_adapter and real_adapter is not None:
+            release_adapter_resources(real_adapter)
