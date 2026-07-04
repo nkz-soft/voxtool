@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from importlib import import_module
 from typing import Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -22,6 +23,34 @@ def resolve_hf_token() -> str | None:
         if value:
             return value
     return None
+
+
+def cuda_is_available() -> bool:
+    """Return True when PyTorch can see a CUDA device.
+
+    Heavy model dependencies are optional in CI, so this helper imports torch
+    lazily and treats missing torch as no CUDA support.
+    """
+    try:
+        torch = import_module("torch")
+    except Exception:  # noqa: BLE001 - torch is optional outside real runs
+        return False
+    return bool(torch.cuda.is_available())
+
+
+def real_model_load_kwargs() -> dict[str, Any]:
+    """Return shared ``from_pretrained`` kwargs for real adapter model loading."""
+    kwargs: dict[str, Any] = {"token": resolve_hf_token()}
+    if cuda_is_available():
+        kwargs.update({"device_map": "auto", "torch_dtype": "auto"})
+    return kwargs
+
+
+def move_inputs_to_runtime_device(inputs: Any) -> Any:
+    """Move tokenized tensors to CUDA when a GPU runtime is available."""
+    if cuda_is_available() and hasattr(inputs, "to"):
+        return inputs.to("cuda")
+    return inputs
 
 
 # Capability flags each pipeline requires from an adapter before it may run.

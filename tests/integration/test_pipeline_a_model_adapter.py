@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from apps.notebook.colab_demo_helpers import run_text_demo
+from apps.notebook.colab_demo_helpers import (
+    demo_dataset,
+    run_all_pipelines,
+    run_text_demo,
+    synthesize_demo_audio,
+)
 from packages.model_runner.adapters.mock import MockModelAdapter
 from packages.pipeline_runner.artifacts import read_pipeline_jsonl
 from packages.pipeline_runner.runner import _AdapterBridge, run_benchmark
@@ -61,3 +66,19 @@ def test_run_benchmark_mock_pipeline_a_preserves_artifacts(tmp_path: Path) -> No
     reloaded = read_pipeline_jsonl(output)
     assert [r.example_id for r in reloaded] == [r.example_id for r in records]
     assert all(r.model_adapter == "MockModelAdapter" for r in reloaded)
+
+
+def test_run_all_pipelines_can_exclude_pipeline_a(tmp_path: Path) -> None:
+    dataset = demo_dataset()
+    audio_examples = synthesize_demo_audio(dataset, output_dir=tmp_path / "audio")
+
+    records, skips = run_all_pipelines(
+        MockModelAdapter(),
+        dataset,
+        audio_examples,
+        pipelines=("B", "D"),
+    )
+
+    assert set(records) == {"B", "D"}
+    assert "A" not in records
+    assert "A" not in skips

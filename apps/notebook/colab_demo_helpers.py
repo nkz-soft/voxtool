@@ -458,8 +458,9 @@ def run_all_pipelines(
     *,
     run_prefix: str = "colab-pipelines",
     asr_adapter: ASRAdapter | None = None,
+    pipelines: Sequence[str] = ALL_PIPELINES,
 ) -> tuple[dict[str, list[PipelineRunRecord]], dict[str, str]]:
-    """Run pipelines A-D for one adapter over the same data.
+    """Run selected pipelines for one adapter over the same data.
 
     Returns ``(records_by_pipeline, skips)`` where ``skips`` maps a pipeline
     letter to the reason the adapter could not serve it (e.g. Pipeline C needs
@@ -467,6 +468,11 @@ def run_all_pipelines(
     model-independent in the current stack: it uses ``asr_adapter`` (a mock by
     default) and reports transcription WER that pipelines C and D build on.
     """
+    requested_pipelines = tuple(pipelines)
+    unknown = sorted(set(requested_pipelines) - set(ALL_PIPELINES))
+    if unknown:
+        raise ValueError(f"Unknown pipeline(s): {', '.join(unknown)}")
+
     registry = default_tool_registry()
     executor = ToolExecutor(registry)
     bridge = _AdapterBridge(adapter)
@@ -474,49 +480,53 @@ def run_all_pipelines(
     records: dict[str, list[PipelineRunRecord]] = {}
     skips: dict[str, str] = {}
 
-    skip_a = check_adapter_for_pipeline(adapter, "A")
-    if skip_a is not None:
-        skips["A"] = skip_a.reason
-    else:
-        records["A"] = run_pipeline_a(
-            list(dataset),
-            run_id=f"{run_prefix}-A",
-            model_adapter=bridge,
-            registry=registry,
-            executor=executor,
-        )
+    if "A" in requested_pipelines:
+        skip_a = check_adapter_for_pipeline(adapter, "A")
+        if skip_a is not None:
+            skips["A"] = skip_a.reason
+        else:
+            records["A"] = run_pipeline_a(
+                list(dataset),
+                run_id=f"{run_prefix}-A",
+                model_adapter=bridge,
+                registry=registry,
+                executor=executor,
+            )
 
-    # Pipeline B is pure ASR; it does not consult the tool-calling adapter.
-    records["B"] = run_pipeline_b(
-        list(audio_examples),
-        run_id=f"{run_prefix}-B",
-        asr_adapter=asr,
-    )
-
-    skip_c = check_adapter_for_pipeline(adapter, "C")
-    if skip_c is not None:
-        skips["C"] = skip_c.reason
-    else:
-        records["C"] = run_pipeline_c(
+    if "B" in requested_pipelines:
+        # Pipeline B is pure ASR; it does not consult the tool-calling adapter.
+        records["B"] = run_pipeline_b(
             list(audio_examples),
-            run_id=f"{run_prefix}-C",
-            model_adapter=bridge,
-            registry=registry,
-            executor=executor,
-        )
-
-    skip_d = check_adapter_for_pipeline(adapter, "D")
-    if skip_d is not None:
-        skips["D"] = skip_d.reason
-    else:
-        records["D"] = run_pipeline_d(
-            list(audio_examples),
-            run_id=f"{run_prefix}-D",
+            run_id=f"{run_prefix}-B",
             asr_adapter=asr,
-            text_adapter=bridge,
-            registry=registry,
-            executor=executor,
         )
+
+    if "C" in requested_pipelines:
+        skip_c = check_adapter_for_pipeline(adapter, "C")
+        if skip_c is not None:
+            skips["C"] = skip_c.reason
+        else:
+            records["C"] = run_pipeline_c(
+                list(audio_examples),
+                run_id=f"{run_prefix}-C",
+                model_adapter=bridge,
+                registry=registry,
+                executor=executor,
+            )
+
+    if "D" in requested_pipelines:
+        skip_d = check_adapter_for_pipeline(adapter, "D")
+        if skip_d is not None:
+            skips["D"] = skip_d.reason
+        else:
+            records["D"] = run_pipeline_d(
+                list(audio_examples),
+                run_id=f"{run_prefix}-D",
+                asr_adapter=asr,
+                text_adapter=bridge,
+                registry=registry,
+                executor=executor,
+            )
 
     return records, skips
 
@@ -528,15 +538,16 @@ def compare_pipelines(
     run_prefix: str = "colab-pipelines",
     config_paths: dict[str, str | Path] | None = None,
     audio_dir: str | Path = "demo_audio",
+    pipelines: Sequence[str] = ALL_PIPELINES,
 ) -> tuple[dict[str, dict[str, list[PipelineRunRecord]]], pd.DataFrame, pd.DataFrame]:
-    """Run every model across pipelines A-D on the same data and compare metrics.
+    """Run every model across selected pipelines and compare metrics.
 
     Synthesizes the audio once from ``dataset`` (defaults to the bilingual
     :func:`demo_dataset`) so all models and pipelines see identical inputs, then
     for each adapter runs every supported pipeline and aggregates per-pipeline
     metrics with the shared :func:`summarize_metrics`. Tool metrics apply to
     A/C/D, WER to B/D, and a modality gap compares each audio pipeline with the
-    Pipeline A text baseline.
+    Pipeline A text baseline when Pipeline A is included.
 
     Returns ``(records_by_model, comparison, skips)``:
 
@@ -563,6 +574,7 @@ def compare_pipelines(
                 dataset,
                 audio_examples,
                 run_prefix=f"{run_prefix}-{adapter_id}",
+                pipelines=pipelines,
             )
             records_by_model[adapter_id] = records
             if records:
