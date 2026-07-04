@@ -612,10 +612,14 @@ def compare_pipelines(
 def record_summary(record: PipelineRunRecord) -> dict[str, Any]:
     """Flatten one run record into the fields the notebook displays."""
     tool_result = record.tool_execution_result
+    parsed = record.parsed_output is not None and not record.validation_errors
     return {
         "example_id": record.example_id,
         "raw_output": record.raw_output,
-        "parsable": record.first_pass_parsable,
+        "parsable": parsed,
+        "first_pass_parsable": record.first_pass_parsable,
+        "repair_attempted": record.repair_attempted,
+        "repair_success": record.repair_success,
         "validation_errors": record.validation_errors,
         "tool": tool_result.tool if tool_result is not None else None,
         "tool_result": tool_result.result if tool_result is not None else None,

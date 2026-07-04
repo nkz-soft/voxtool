@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 from apps.notebook.colab_demo_helpers import (
     compare_models,
     demo_dataset,
+    record_summary,
     run_all_pipelines,
     run_text_demo,
     synthesize_demo_audio,
 )
+from packages.model_runner.adapters.base import ModelResponse
 from packages.model_runner.adapters.mock import MockModelAdapter
 from packages.pipeline_runner.artifacts import read_pipeline_jsonl
 from packages.pipeline_runner.runner import _AdapterBridge, run_benchmark
@@ -26,6 +29,15 @@ class _ReleasableMockAdapter(MockModelAdapter):
 
     def unload_runtime(self) -> None:
         self.unloaded = True
+
+
+class _FencedJsonAdapter(MockModelAdapter):
+    def generate_text(
+        self, prompt: str, config: dict[str, Any] | None = None
+    ) -> ModelResponse:
+        response = super().generate_text(prompt, config)
+        response.raw_output = f"```json\n{response.raw_output}\n```"
+        return response
 
 
 def test_mock_adapter_runs_pipeline_a_through_bridge(tmp_path: Path) -> None:
@@ -47,6 +59,21 @@ def test_mock_adapter_runs_pipeline_a_through_bridge(tmp_path: Path) -> None:
     assert record.tool_execution_result.tool == "units.convert"
     assert record.final_answer is not None
     assert output.exists()
+
+
+def test_record_summary_distinguishes_repaired_json_from_first_pass_json() -> None:
+    records = run_text_demo(
+        _FencedJsonAdapter(),
+        ["Convert 2 kilometers to meters."],
+        run_id="fenced-json",
+    )
+
+    summary = record_summary(records[0])
+
+    assert summary["parsable"] is True
+    assert summary["first_pass_parsable"] is False
+    assert summary["repair_attempted"] is True
+    assert summary["repair_success"] is True
 
 
 def test_bridge_preserves_adapter_id_as_model_adapter_name() -> None:

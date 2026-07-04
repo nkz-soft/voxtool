@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gc
 import os
 from importlib import import_module
 from typing import Any, Literal, Protocol, runtime_checkable
@@ -120,6 +121,7 @@ def release_adapter_resources(adapter: object) -> None:
     unload = getattr(adapter, "unload_runtime", None)
     if callable(unload):
         unload()
+    gc.collect()
 
     try:
         torch = import_module("torch")
