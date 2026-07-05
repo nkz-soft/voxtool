@@ -98,6 +98,7 @@ class VoxtralAdapter:
 
     def _tokenize_text_prompt(self, processor: Any, prompt: str) -> Any:
         """Tokenize a text prompt, falling back when no chat template is set."""
+        self._ensure_padding_token(processor)
         if hasattr(processor, "apply_chat_template"):
             messages = [
                 {
@@ -116,6 +117,21 @@ class VoxtralAdapter:
                     raise
 
         return processor(prompt, return_tensors="pt")
+
+    def _ensure_padding_token(self, processor: Any) -> None:
+        """Use EOS as padding token when the processor tokenizer has none."""
+        tokenizer = getattr(processor, "tokenizer", processor)
+        if getattr(tokenizer, "pad_token", None) is not None:
+            return
+
+        eos_token = getattr(tokenizer, "eos_token", None)
+        if eos_token is not None:
+            tokenizer.pad_token = eos_token
+            return
+
+        eos_token_id = getattr(tokenizer, "eos_token_id", None)
+        if eos_token_id is not None:
+            tokenizer.pad_token_id = eos_token_id
 
     def generate_text(
         self, prompt: str, config: dict[str, Any] | None = None

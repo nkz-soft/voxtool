@@ -68,11 +68,21 @@ class _FakeProcessor(_FakeTokenizer):
 class _FakeProcessorWithoutTemplate(_FakeTokenizer):
     fallback_called = False
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = self
+        self.eos_token = "</s>"
+        self.pad_token: str | None = None
+
     def __call__(
         self, prompt: str, *, return_tensors: str
     ) -> dict[str, list[list[int]]]:
         assert prompt == "prompt"
         assert return_tensors == "pt"
+        if self.pad_token is None:
+            raise ValueError(
+                "Asking to pad but the tokenizer does not have a padding token"
+            )
         self.fallback_called = True
         return {"input_ids": [[30, 31, 32]]}
 
@@ -208,3 +218,14 @@ def test_voxtral_falls_back_when_chat_template_is_missing() -> None:
     assert response.raw_output == "completion-json"
     assert processor.fallback_called
     assert processor.decoded_ids == [40, 41]
+
+
+def test_voxtral_sets_missing_padding_token_before_tokenization() -> None:
+    processor = _FakeProcessorWithoutTemplate()
+    adapter = VoxtralAdapter(model_name="dummy/voxtral")
+    adapter._runtime = (processor, _FakeVoxtralModel())
+
+    response = adapter.generate_text("prompt")
+
+    assert response.error is None
+    assert processor.pad_token == processor.eos_token
