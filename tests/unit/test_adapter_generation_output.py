@@ -114,6 +114,38 @@ class _FakeVoxtralModel:
         return [[30, 31, 32, 40, 41]]
 
 
+class _FakeEmbedding:
+    def __init__(self, num_embeddings: int) -> None:
+        self.num_embeddings = num_embeddings
+
+
+class _FakeVocabVoxtralModel(_FakeVoxtralModel):
+    def __init__(self, num_embeddings: int) -> None:
+        self._embedding = _FakeEmbedding(num_embeddings)
+        self.generate_called = False
+
+    def get_input_embeddings(self) -> _FakeEmbedding:
+        return self._embedding
+
+    def generate(self, **_: object) -> list[list[int]]:
+        self.generate_called = True
+        return super().generate()
+
+
+class _FakeOutOfVocabularyProcessor(_FakeProcessor):
+    def apply_chat_template(
+        self,
+        messages: list[dict[str, object]],
+        *,
+        return_tensors: str,
+        return_dict: bool,
+    ) -> dict[str, list[list[int]]]:
+        assert messages[0]["role"] == "user"
+        assert return_tensors == "pt"
+        assert return_dict is True
+        return {"input_ids": [[30, 3000, 32]]}
+
+
 class _FakeRuntimeModel:
     def __init__(self) -> None:
         self.cpu_called = False
@@ -227,3 +259,17 @@ def test_voxtral_sets_missing_padding_token_before_tokenization() -> None:
 
     assert response.error is None
     assert processor.pad_token == processor.eos_token
+
+
+def test_voxtral_rejects_input_ids_outside_model_vocabulary() -> None:
+    processor = _FakeOutOfVocabularyProcessor()
+    model = _FakeVocabVoxtralModel(num_embeddings=100)
+    adapter = VoxtralAdapter(model_name="dummy/voxtral")
+    adapter._runtime = (processor, model)
+
+    response = adapter.generate_text("prompt")
+
+    assert response.raw_output == ""
+    assert response.error is not None
+    assert "outside the model vocabulary" in response.error
+    assert not model.generate_called

@@ -8,7 +8,6 @@ from packages.model_runner.adapters.base import (
     clear_cuda_memory,
     cuda_is_available,
     generated_token_ids,
-    move_inputs_to_runtime_device,
     real_model_load_kwargs,
     release_adapter_resources,
     release_runtime_objects,
@@ -162,6 +161,91 @@ class VoxtralAdapter:
         if eos_token_id is not None:
             tokenizer.pad_token_id = eos_token_id
 
+    def _move_inputs_to_model_device(self, inputs: Any, model: Any) -> Any:
+        """Move processor outputs to the model device used by Transformers."""
+        device = getattr(model, "device", None)
+        if device is None:
+            return inputs
+        to = getattr(inputs, "to", None)
+        if callable(to):
+            return to(device)
+        return inputs
+
+    def _validate_input_ids_for_model(self, inputs: Any, model: Any) -> None:
+        """Fail before CUDA generation if token IDs exceed model embeddings."""
+        vocab_size = self._model_vocab_size(model)
+        if vocab_size is None:
+            return
+
+        token_ids = list(self._flatten_input_ids(self._input_ids(inputs)))
+        if not token_ids:
+            return
+
+        min_token_id = min(token_ids)
+        max_token_id = max(token_ids)
+        if min_token_id < 0 or max_token_id >= vocab_size:
+            raise ValueError(
+                "Voxtral tokenization produced input IDs outside the model "
+                f"vocabulary: min={min_token_id}, max={max_token_id}, "
+                f"vocab_size={vocab_size}. Refresh the model/processor cache "
+                "or use a Transformers build that includes the Voxtral chat "
+                "template."
+            )
+
+    def _model_vocab_size(self, model: Any) -> int | None:
+        embeddings = None
+        get_input_embeddings = getattr(model, "get_input_embeddings", None)
+        if callable(get_input_embeddings):
+            embeddings = get_input_embeddings()
+
+        num_embeddings = getattr(embeddings, "num_embeddings", None)
+        if isinstance(num_embeddings, int):
+            return num_embeddings
+
+        weight = getattr(embeddings, "weight", None)
+        shape = getattr(weight, "shape", None)
+        if shape is not None and len(shape) > 0:
+            return int(shape[0])
+
+        vocab_size = getattr(getattr(model, "config", None), "vocab_size", None)
+        if isinstance(vocab_size, int):
+            return vocab_size
+        return None
+
+    def _input_ids(self, inputs: Any) -> Any | None:
+        if isinstance(inputs, dict):
+            return inputs.get("input_ids")
+        if hasattr(inputs, "get"):
+            try:
+                return inputs.get("input_ids")
+            except Exception:  # noqa: BLE001 - support BatchFeature-like inputs
+                pass
+        return getattr(inputs, "input_ids", None)
+
+    def _flatten_input_ids(self, value: Any) -> list[int]:
+        if value is None:
+            return []
+
+        detach = getattr(value, "detach", None)
+        if callable(detach):
+            value = detach()
+        cpu = getattr(value, "cpu", None)
+        if callable(cpu):
+            value = cpu()
+        reshape = getattr(value, "reshape", None)
+        tolist = getattr(value, "tolist", None)
+        if callable(reshape) and callable(tolist):
+            return [int(token_id) for token_id in value.reshape(-1).tolist()]
+
+        if isinstance(value, int):
+            return [value]
+        if isinstance(value, list | tuple):
+            token_ids: list[int] = []
+            for item in value:
+                token_ids.extend(self._flatten_input_ids(item))
+            return token_ids
+        return []
+
     def generate_text(
         self, prompt: str, config: dict[str, Any] | None = None
     ) -> ModelResponse:
@@ -176,15 +260,21 @@ class VoxtralAdapter:
             release_adapter_resources(self)
             return ModelResponse(error=f"voxtral load failed: {exc}")
 
-        options = {**self._generation, **(config or {})}
-        inputs = self._tokenize_text_prompt(processor, prompt)
-        inputs = move_inputs_to_runtime_device(inputs)
-        outputs = model.generate(**inputs, **options)
-        output_ids = outputs[0]
-        if hasattr(output_ids, "detach"):
-            output_ids = output_ids.detach().cpu()
-        completion_ids = generated_token_ids(output_ids, inputs)
-        text = processor.decode(completion_ids, skip_special_tokens=True)
+        try:
+            options = {**self._generation, **(config or {})}
+            inputs = self._tokenize_text_prompt(processor, prompt)
+            self._validate_input_ids_for_model(inputs, model)
+            inputs = self._move_inputs_to_model_device(inputs, model)
+            outputs = model.generate(**inputs, **options)
+            output_ids = outputs[0]
+            if hasattr(output_ids, "detach"):
+                output_ids = output_ids.detach().cpu()
+            completion_ids = generated_token_ids(output_ids, inputs)
+            text = processor.decode(completion_ids, skip_special_tokens=True)
+        except Exception as exc:  # noqa: BLE001 - surface generation failures
+            release_adapter_resources(self)
+            return ModelResponse(error=f"voxtral generation failed: {exc}")
+
         return ModelResponse(
             raw_output=text,
             metadata={
