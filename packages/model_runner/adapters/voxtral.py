@@ -15,6 +15,16 @@ from packages.model_runner.adapters.base import (
     resolve_hf_token,
 )
 
+_VOXTRAL_TEXT_CHAT_TEMPLATE = (
+    "{% for message in messages %}"
+    "{% if message['role'] == 'user' %}"
+    "{{ bos_token + '[INST] ' + message['content'] | trim + ' [/INST]' }}"
+    "{% elif message['role'] == 'assistant' %}"
+    "{{ ' ' + message['content'] | trim + eos_token }}"
+    "{% endif %}"
+    "{% endfor %}"
+)
+
 
 class VoxtralAdapter:
     """Import-safe adapter for the Voxtral audio+text model.
@@ -97,26 +107,35 @@ class VoxtralAdapter:
         self._runtime = None
 
     def _tokenize_text_prompt(self, processor: Any, prompt: str) -> Any:
-        """Tokenize a text prompt, falling back when no chat template is set."""
+        """Tokenize text through Voxtral's chat path."""
         self._ensure_padding_token(processor)
-        if hasattr(processor, "apply_chat_template"):
-            messages = [
-                {
-                    "role": "user",
-                    "content": [{"type": "text", "text": prompt}],
-                }
-            ]
-            try:
-                return processor.apply_chat_template(
-                    messages,
-                    return_tensors="pt",
-                    return_dict=True,
-                )
-            except ValueError as exc:
-                if "chat_template" not in str(exc):
-                    raise
+        if not hasattr(processor, "apply_chat_template"):
+            raise ValueError(
+                "Voxtral processor must provide apply_chat_template for generation."
+            )
 
-        return processor(prompt, return_tensors="pt")
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": prompt}],
+            }
+        ]
+        try:
+            return processor.apply_chat_template(
+                messages,
+                return_tensors="pt",
+                return_dict=True,
+            )
+        except ValueError as exc:
+            if "chat_template" not in str(exc):
+                raise
+
+        return processor.apply_chat_template(
+            [{"role": "user", "content": prompt}],
+            chat_template=_VOXTRAL_TEXT_CHAT_TEMPLATE,
+            return_tensors="pt",
+            return_dict=True,
+        )
 
     def _ensure_padding_token(self, processor: Any) -> None:
         """Use EOS as padding token when the processor tokenizer has none."""

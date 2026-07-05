@@ -66,36 +66,34 @@ class _FakeProcessor(_FakeTokenizer):
 
 
 class _FakeProcessorWithoutTemplate(_FakeTokenizer):
-    fallback_called = False
-
     def __init__(self) -> None:
         super().__init__()
         self.tokenizer = self
         self.eos_token = "</s>"
         self.pad_token: str | None = None
+        self.default_template_used = False
 
     def __call__(
         self, prompt: str, *, return_tensors: str
     ) -> dict[str, list[list[int]]]:
-        assert prompt == "prompt"
-        assert return_tensors == "pt"
-        if self.pad_token is None:
-            raise ValueError(
-                "Asking to pad but the tokenizer does not have a padding token"
-            )
-        self.fallback_called = True
-        return {"input_ids": [[30, 31, 32]]}
+        raise AssertionError("Voxtral must not use raw processor tokenization")
 
     def apply_chat_template(
         self,
         messages: list[dict[str, object]],
         *,
+        chat_template: str | None = None,
         return_tensors: str,
         return_dict: bool,
     ) -> dict[str, list[list[int]]]:
         assert messages[0]["role"] == "user"
         assert return_tensors == "pt"
         assert return_dict is True
+        if chat_template is not None:
+            self.default_template_used = True
+            assert messages[0]["content"] == "prompt"
+            assert "[INST]" in chat_template
+            return {"input_ids": [[30, 31, 32]]}
         raise ValueError(
             "Cannot use chat template functions because "
             "tokenizer.chat_template is not set"
@@ -207,7 +205,7 @@ def test_voxtral_uses_conditional_generation_and_decodes_completion(
     assert _FakeVoxtralModel.from_pretrained_called
 
 
-def test_voxtral_falls_back_when_chat_template_is_missing() -> None:
+def test_voxtral_supplies_default_template_when_chat_template_is_missing() -> None:
     processor = _FakeProcessorWithoutTemplate()
     adapter = VoxtralAdapter(model_name="dummy/voxtral")
     adapter._runtime = (processor, _FakeVoxtralModel())
@@ -216,7 +214,7 @@ def test_voxtral_falls_back_when_chat_template_is_missing() -> None:
 
     assert response.error is None
     assert response.raw_output == "completion-json"
-    assert processor.fallback_called
+    assert processor.default_template_used
     assert processor.decoded_ids == [40, 41]
 
 
