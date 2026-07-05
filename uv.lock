@@ -4853,7 +4853,7 @@ requires-dist = [
     { name = "notebook", marker = "extra == 'notebook'", specifier = ">=7.6.0" },
     { name = "pandas", specifier = ">=3.0.3" },
     { name = "peft", marker = "extra == 'finetuning'", specifier = ">=0.13.0" },
-    { name = "piper-tts", marker = "extra == 'speech'", specifier = ">=1.2.0" },
+    { name = "piper-tts", marker = "extra == 'speech'", specifier = ">=1.4.2" },
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pyyaml", specifier = ">=6.0.3" },
@@ -4897,7 +4897,7 @@ notebook = [
 quantization = [{ name = "bitsandbytes", specifier = ">=0.44.0" }]
 speech = [
     { name = "edge-tts", specifier = ">=7.2.8" },
-    { name = "piper-tts", specifier = ">=1.2.0" },
+    { name = "piper-tts", specifier = ">=1.4.2" },
 ]
 
 [[package]]

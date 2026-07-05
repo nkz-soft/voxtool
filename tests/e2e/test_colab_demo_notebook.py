@@ -30,6 +30,7 @@ def test_notebook_documents_required_demo_steps() -> None:
     assert "run_text_demo" in text
     # Audio examples are generated from text, not uploaded.
     assert "synthesize_demo_audio" in text
+    assert "piper" in text
     assert "files.upload" not in text
     assert "validation" in text
     assert "final_answer" in text or "final answer" in text

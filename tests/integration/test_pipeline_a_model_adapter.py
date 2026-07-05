@@ -12,12 +12,14 @@ from apps.notebook.colab_demo_helpers import (
     run_text_demo,
     synthesize_demo_audio,
 )
+from packages.dataset_builder.models import BenchmarkExample
 from packages.model_runner.adapters.base import ModelResponse
 from packages.model_runner.adapters.mock import MockModelAdapter
 from packages.pipeline_runner.artifacts import read_pipeline_jsonl
 from packages.pipeline_runner.runner import _AdapterBridge, run_benchmark
 from packages.tool_schema.providers import ToolExecutor
 from packages.tool_schema.units import default_tool_registry
+from packages.tts_synth.models import SynthesisSettings
 
 FIXTURE = Path("data/fixtures/advanced/sample_text.jsonl")
 
@@ -134,7 +136,11 @@ def test_run_benchmark_releases_real_adapter_runtime(
 
 def test_run_all_pipelines_can_exclude_pipeline_a(tmp_path: Path) -> None:
     dataset = demo_dataset()
-    audio_examples = synthesize_demo_audio(dataset, output_dir=tmp_path / "audio")
+    audio_examples = synthesize_demo_audio(
+        dataset,
+        output_dir=tmp_path / "audio",
+        settings=SynthesisSettings(engine="fixture-silent"),
+    )
 
     records, skips = run_all_pipelines(
         MockModelAdapter(),
@@ -146,6 +152,45 @@ def test_run_all_pipelines_can_exclude_pipeline_a(tmp_path: Path) -> None:
     assert set(records) == {"B", "D"}
     assert "A" not in records
     assert "A" not in skips
+
+
+def test_synthesize_demo_audio_defaults_to_discovered_piper_settings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    dataset = demo_dataset()
+    model_path = tmp_path / "voice.onnx"
+    config_path = tmp_path / "voice.onnx.json"
+    model_path.write_bytes(b"model")
+    config_path.write_text("{}", encoding="utf-8")
+    monkeypatch.setenv("VOXTOOL_PIPER_VOICE", "test-voice")
+    monkeypatch.setenv("VOXTOOL_PIPER_VOICE_MODEL", str(model_path))
+    monkeypatch.setenv("VOXTOOL_PIPER_VOICE_CONFIG", str(config_path))
+
+    captured: dict[str, object] = {}
+
+    def fake_synthesize_dataset(
+        examples: list[BenchmarkExample],
+        *,
+        output_dir: Path,
+        settings: SynthesisSettings,
+    ) -> list[Any]:
+        assert examples
+        captured["settings"] = settings
+        captured["output_dir"] = output_dir
+        return []
+
+    monkeypatch.setattr(
+        "apps.notebook.colab_demo_helpers.synthesize_dataset",
+        fake_synthesize_dataset,
+    )
+
+    synthesize_demo_audio(dataset, output_dir=tmp_path / "audio")
+
+    settings = captured["settings"]
+    assert isinstance(settings, SynthesisSettings)
+    assert settings.engine == "piper"
+    assert settings.voice == "test-voice"
+    assert settings.voice_model_path == model_path
 
 
 def test_compare_models_releases_adapter_after_each_model(

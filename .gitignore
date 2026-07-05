@@ -218,6 +218,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Generated benchmark artifacts
+.tmp/
 data/generated/
 data/raw/**
 data/processed/**
