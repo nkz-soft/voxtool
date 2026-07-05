@@ -14,16 +14,6 @@ from packages.model_runner.adapters.base import (
     resolve_hf_token,
 )
 
-_VOXTRAL_TEXT_CHAT_TEMPLATE = (
-    "{% for message in messages %}"
-    "{% if message['role'] == 'user' %}"
-    "{{ bos_token + '[INST] ' + message['content'] | trim + ' [/INST]' }}"
-    "{% elif message['role'] == 'assistant' %}"
-    "{{ ' ' + message['content'] | trim + eos_token }}"
-    "{% endif %}"
-    "{% endfor %}"
-)
-
 
 class VoxtralAdapter:
     """Import-safe adapter for the Voxtral audio+text model.
@@ -120,31 +110,47 @@ class VoxtralAdapter:
             }
         ]
         try:
-            return processor.apply_chat_template(
-                messages,
-                return_tensors="pt",
-                return_dict=True,
-            )
+            return processor.apply_chat_template(messages)
         except ValueError as exc:
             if "chat_template" not in str(exc):
                 raise
+            raise ValueError(
+                "Voxtral processor has no chat template. Install or upgrade "
+                "mistral-common[audio] with the model extra, then refresh the "
+                "cached processor files for this model."
+            ) from exc
 
-        self._set_default_text_chat_template(processor)
-        return processor.apply_chat_template(
-            [{"role": "user", "content": prompt}],
-            return_tensors="pt",
-            return_dict=True,
-        )
+        raise AssertionError("unreachable")
 
-    def _set_default_text_chat_template(self, processor: Any) -> None:
-        """Install a text chat template for processors that do not ship one."""
-        for target in (processor, getattr(processor, "tokenizer", None)):
-            if target is None:
-                continue
+    def _processor_vocab_size(self, processor: Any) -> int | None:
+        tokenizer = getattr(processor, "tokenizer", processor)
+        length = getattr(tokenizer, "__len__", None)
+        if callable(length):
             try:
-                target.chat_template = _VOXTRAL_TEXT_CHAT_TEMPLATE
-            except AttributeError:
-                continue
+                return int(length())
+            except Exception:  # noqa: BLE001 - optional diagnostic only
+                pass
+        vocab_size = getattr(tokenizer, "vocab_size", None)
+        if isinstance(vocab_size, int):
+            return vocab_size
+        return None
+
+    def _validate_processor_model_vocab(self, processor: Any, model: Any) -> None:
+        """Catch mismatched cached processor/model files before generation."""
+        processor_vocab_size = self._processor_vocab_size(processor)
+        model_vocab_size = self._model_vocab_size(model)
+        if (
+            processor_vocab_size is None
+            or model_vocab_size is None
+            or processor_vocab_size <= model_vocab_size
+        ):
+            return
+        raise ValueError(
+            "Voxtral processor vocabulary is larger than the model embedding "
+            f"vocabulary: processor_vocab_size={processor_vocab_size}, "
+            f"model_vocab_size={model_vocab_size}. Refresh the cached "
+            "processor/model files so they come from the same revision."
+        )
 
     def _ensure_padding_token(self, processor: Any) -> None:
         """Use EOS as padding token when the processor tokenizer has none."""
@@ -262,6 +268,7 @@ class VoxtralAdapter:
 
         try:
             options = {**self._generation, **(config or {})}
+            self._validate_processor_model_vocab(processor, model)
             inputs = self._tokenize_text_prompt(processor, prompt)
             self._validate_input_ids_for_model(inputs, model)
             inputs = self._move_inputs_to_model_device(inputs, model)

@@ -54,13 +54,8 @@ class _FakeProcessor(_FakeTokenizer):
     def apply_chat_template(
         self,
         messages: list[dict[str, object]],
-        *,
-        return_tensors: str,
-        return_dict: bool,
     ) -> dict[str, list[list[int]]]:
         assert messages[0]["role"] == "user"
-        assert return_tensors == "pt"
-        assert return_dict is True
         self.chat_template_called = True
         return {"input_ids": [[30, 31, 32]]}
 
@@ -71,8 +66,6 @@ class _FakeProcessorWithoutTemplate(_FakeTokenizer):
         self.tokenizer = self
         self.eos_token = "</s>"
         self.pad_token: str | None = None
-        self.chat_template: str | None = None
-        self.default_template_used = False
 
     def __call__(
         self, prompt: str, *, return_tensors: str
@@ -82,18 +75,8 @@ class _FakeProcessorWithoutTemplate(_FakeTokenizer):
     def apply_chat_template(
         self,
         messages: list[dict[str, object]],
-        *,
-        return_tensors: str,
-        return_dict: bool,
     ) -> dict[str, list[list[int]]]:
         assert messages[0]["role"] == "user"
-        assert return_tensors == "pt"
-        assert return_dict is True
-        if self.chat_template is not None:
-            self.default_template_used = True
-            assert messages[0]["content"] == "prompt"
-            assert "[INST]" in self.chat_template
-            return {"input_ids": [[30, 31, 32]]}
         raise ValueError(
             "Cannot use chat template functions because "
             "tokenizer.chat_template is not set"
@@ -136,13 +119,8 @@ class _FakeOutOfVocabularyProcessor(_FakeProcessor):
     def apply_chat_template(
         self,
         messages: list[dict[str, object]],
-        *,
-        return_tensors: str,
-        return_dict: bool,
     ) -> dict[str, list[list[int]]]:
         assert messages[0]["role"] == "user"
-        assert return_tensors == "pt"
-        assert return_dict is True
         return {"input_ids": [[30, 3000, 32]]}
 
 
@@ -237,17 +215,17 @@ def test_voxtral_uses_conditional_generation_and_decodes_completion(
     assert _FakeVoxtralModel.from_pretrained_called
 
 
-def test_voxtral_supplies_default_template_when_chat_template_is_missing() -> None:
+def test_voxtral_reports_missing_native_chat_template() -> None:
     processor = _FakeProcessorWithoutTemplate()
     adapter = VoxtralAdapter(model_name="dummy/voxtral")
     adapter._runtime = (processor, _FakeVoxtralModel())
 
     response = adapter.generate_text("prompt")
 
-    assert response.error is None
-    assert response.raw_output == "completion-json"
-    assert processor.default_template_used
-    assert processor.decoded_ids == [40, 41]
+    assert response.raw_output == ""
+    assert response.error is not None
+    assert "mistral-common[audio]" in response.error
+    assert "chat template" in response.error
 
 
 def test_voxtral_sets_missing_padding_token_before_tokenization() -> None:
@@ -257,7 +235,8 @@ def test_voxtral_sets_missing_padding_token_before_tokenization() -> None:
 
     response = adapter.generate_text("prompt")
 
-    assert response.error is None
+    assert response.error is not None
+    assert "chat template" in response.error
     assert processor.pad_token == processor.eos_token
 
 
