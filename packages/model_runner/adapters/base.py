@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import gc
 import os
+from contextlib import suppress
+from importlib import import_module
 from typing import Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -13,6 +16,7 @@ Pipeline = Literal["A", "C", "D"]
 # interactive login. ``None`` lets ``transformers`` fall back to any cached
 # ``huggingface_hub.login`` token.
 _HF_TOKEN_ENV_VARS: tuple[str, ...] = ("HF_TOKEN", "HUGGING_FACE_HUB_TOKEN")
+_DEFAULT_CUDA_ALLOC_CONF = "expandable_segments:True"
 
 
 def resolve_hf_token() -> str | None:
@@ -22,6 +26,157 @@ def resolve_hf_token() -> str | None:
         if value:
             return value
     return None
+
+
+def cuda_is_available() -> bool:
+    """Return True when PyTorch can see a CUDA device.
+
+    Heavy model dependencies are optional in CI, so this helper imports torch
+    lazily and treats missing torch as no CUDA support.
+    """
+    _configure_cuda_allocator()
+    try:
+        torch = import_module("torch")
+    except Exception:  # noqa: BLE001 - torch is optional outside real runs
+        return False
+    return bool(torch.cuda.is_available())
+
+
+def real_model_load_kwargs() -> dict[str, Any]:
+    """Return shared ``from_pretrained`` kwargs for real adapter model loading."""
+    kwargs: dict[str, Any] = {"token": resolve_hf_token()}
+    if cuda_is_available():
+        kwargs.update({"device_map": "auto", "torch_dtype": "auto"})
+    return kwargs
+
+
+def move_inputs_to_runtime_device(inputs: Any) -> Any:
+    """Move tokenized tensors to CUDA when a GPU runtime is available."""
+    if cuda_is_available() and hasattr(inputs, "to"):
+        return inputs.to("cuda")
+    return inputs
+
+
+def generated_token_ids(output_ids: Any, inputs: Any) -> Any:
+    """Return only tokens generated after the prompt prefix.
+
+    Decoder-only Transformers models return the full prompt plus completion from
+    ``generate``. Benchmark artifacts need the model completion only, otherwise
+    strict JSON parsing sees the prompt instructions before the JSON envelope.
+    """
+    prompt_length = _input_token_count(inputs)
+    if prompt_length == 0:
+        return output_ids
+    try:
+        return output_ids[prompt_length:]
+    except Exception:  # noqa: BLE001 - support tensor/list-like outputs broadly
+        return output_ids
+
+
+def _input_token_count(inputs: Any) -> int:
+    input_ids = _input_ids(inputs)
+    if input_ids is None:
+        return 0
+
+    shape = getattr(input_ids, "shape", None)
+    if shape is not None and len(shape) >= 1:
+        return int(shape[-1])
+
+    size = getattr(input_ids, "size", None)
+    if callable(size):
+        try:
+            return int(size(-1))
+        except Exception:  # noqa: BLE001 - fall through to sequence handling
+            pass
+
+    try:
+        first_sequence = input_ids[0]
+    except Exception:  # noqa: BLE001 - final fallback for flat token sequences
+        try:
+            return len(input_ids)
+        except Exception:  # noqa: BLE001
+            return 0
+
+    try:
+        return len(first_sequence)
+    except Exception:  # noqa: BLE001
+        return 0
+
+
+def _input_ids(inputs: Any) -> Any | None:
+    if isinstance(inputs, dict):
+        return inputs.get("input_ids")
+    if hasattr(inputs, "get"):
+        try:
+            return inputs.get("input_ids")
+        except Exception:  # noqa: BLE001
+            pass
+    return getattr(inputs, "input_ids", None)
+
+
+def release_adapter_resources(adapter: object) -> None:
+    """Release cached adapter runtime objects and clear PyTorch CUDA cache.
+
+    Real adapters keep their loaded model/tokenizer pair on ``_runtime`` so a
+    single adapter can serve many examples without reloading weights. Comparison
+    runs that move to the next adapter should call this to free GPU memory.
+    """
+    unload = getattr(adapter, "unload_runtime", None)
+    if callable(unload):
+        unload()
+    clear_cuda_memory()
+
+
+def release_runtime_objects(runtime: object) -> None:
+    """Move cached runtime objects off GPU before their references are dropped."""
+    if isinstance(runtime, tuple | list | set):
+        for item in runtime:
+            _move_runtime_object_to_cpu(item)
+    elif runtime is not None:
+        _move_runtime_object_to_cpu(runtime)
+
+
+def clear_cuda_memory() -> None:
+    """Collect Python garbage and clear PyTorch CUDA allocator caches."""
+    _configure_cuda_allocator()
+    gc.collect()
+
+    try:
+        torch = import_module("torch")
+    except Exception:  # noqa: BLE001 - torch is optional outside real runs
+        return
+
+    cuda = getattr(torch, "cuda", None)
+    is_available = getattr(cuda, "is_available", None)
+    if not callable(is_available) or not is_available():
+        return
+
+    empty_cache = getattr(cuda, "empty_cache", None)
+    if callable(empty_cache):
+        empty_cache()
+
+    ipc_collect = getattr(cuda, "ipc_collect", None)
+    if callable(ipc_collect):
+        ipc_collect()
+
+
+def _configure_cuda_allocator() -> None:
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", _DEFAULT_CUDA_ALLOC_CONF)
+
+
+def _move_runtime_object_to_cpu(item: object) -> None:
+    cpu = getattr(item, "cpu", None)
+    if callable(cpu):
+        try:
+            cpu()
+            return
+        except Exception:  # noqa: BLE001 - best-effort cleanup
+            pass
+
+    to = getattr(item, "to", None)
+    if callable(to):
+        with suppress(Exception):
+            to("cpu")
 
 
 # Capability flags each pipeline requires from an adapter before it may run.

@@ -24,6 +24,25 @@ def test_valid_tool_envelope_parses_to_typed_model() -> None:
     assert envelope.tool_call.arguments.to_unit is Unit.METER
 
 
+def test_valid_tool_envelope_allows_null_final_answer() -> None:
+    envelope = ModelOutputEnvelope.model_validate(
+        {
+            "needs_tool": True,
+            "tool_call": {
+                "tool": "units.convert",
+                "arguments": {
+                    "value": 2.5,
+                    "from_unit": "kilometer",
+                    "to_unit": "meter",
+                },
+            },
+            "final_answer": None,
+        }
+    )
+
+    assert envelope.final_answer is None
+
+
 def test_valid_no_tool_envelope_requires_null_tool_call() -> None:
     envelope = ModelOutputEnvelope.model_validate(
         {

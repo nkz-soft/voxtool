@@ -19,6 +19,33 @@ dependencies = [
     "uvicorn>=0.30.0",
 ]
 
+[project.optional-dependencies]
+# Keep these pip extras aligned with the same-named dependency groups below.
+# Colab and other non-uv environments use `pip install -e '.[model,notebook]'`.
+notebook = [
+    "jupyter>=1.1.0",
+    "notebook>=7.6.0",
+]
+model = [
+    "accelerate>=1.0.0",
+    "huggingface-hub>=0.26.0",
+    "mistral-common[audio]>=1.8.1",
+    "torch>=2.12.1",
+    "transformers>=5.12.0",
+]
+finetuning = [
+    "datasets>=5.0.0",
+    "peft>=0.13.0",
+    "trl>=0.11.0",
+]
+speech = [
+    "edge-tts>=7.2.8",
+    "piper-tts>=1.2.0",
+]
+quantization = [
+    "bitsandbytes>=0.44.0",
+]
+
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -55,8 +82,9 @@ notebook = [
 model = [
     "accelerate>=1.0.0",
     "huggingface-hub>=0.26.0",
+    "mistral-common[audio]>=1.8.1",
     "torch>=2.12.1",
-    "transformers>=4.45.0",
+    "transformers>=5.12.0",
 ]
 finetuning = [
     "datasets>=5.0.0",

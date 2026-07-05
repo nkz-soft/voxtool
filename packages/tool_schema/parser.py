@@ -51,11 +51,13 @@ def parse_model_output(
             validation_errors=[parse_result.error or "Invalid JSON output."],
         )
 
-    validation_errors = _validate_envelope_shape(parse_result.parsed_json)
+    parsed_json = _normalize_tool_call_alias(parse_result.parsed_json)
+
+    validation_errors = _validate_envelope_shape(parsed_json)
     if validation_errors:
         return ParserResult(
             raw_output=raw_output,
-            parsed_json=parse_result.parsed_json,
+            parsed_json=parsed_json,
             first_pass_parsable=parse_result.first_pass_parsable,
             repair_attempted=parse_result.repair_attempted,
             repair_success=parse_result.repair_success,
@@ -63,13 +65,13 @@ def parse_model_output(
         )
 
     structured_failures = _validate_registered_tool_call(
-        parse_result.parsed_json,
+        parsed_json,
         active_registry,
     )
     if structured_failures:
         return ParserResult(
             raw_output=raw_output,
-            parsed_json=parse_result.parsed_json,
+            parsed_json=parsed_json,
             first_pass_parsable=parse_result.first_pass_parsable,
             repair_attempted=parse_result.repair_attempted,
             repair_success=parse_result.repair_success,
@@ -77,11 +79,11 @@ def parse_model_output(
         )
 
     try:
-        envelope = ModelOutputEnvelope.model_validate(parse_result.parsed_json)
+        envelope = ModelOutputEnvelope.model_validate(parsed_json)
     except ValidationError as exc:
         return ParserResult(
             raw_output=raw_output,
-            parsed_json=parse_result.parsed_json,
+            parsed_json=parsed_json,
             first_pass_parsable=parse_result.first_pass_parsable,
             repair_attempted=parse_result.repair_attempted,
             repair_success=parse_result.repair_success,
@@ -90,7 +92,7 @@ def parse_model_output(
 
     return ParserResult(
         raw_output=raw_output,
-        parsed_json=parse_result.parsed_json,
+        parsed_json=parsed_json,
         envelope=envelope,
         first_pass_parsable=parse_result.first_pass_parsable,
         repair_attempted=parse_result.repair_attempted,
@@ -156,6 +158,20 @@ def _load_json_object(raw_output: str) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         raise ValueError("model output must be a JSON object")
     return cast(dict[str, Any], parsed)
+
+
+def _normalize_tool_call_alias(parsed_json: dict[str, Any]) -> dict[str, Any]:
+    tool_call = parsed_json.get("tool_call")
+    if not isinstance(tool_call, dict):
+        return parsed_json
+    if "tool" in tool_call or "name" not in tool_call:
+        return parsed_json
+
+    normalized = dict(parsed_json)
+    normalized_tool_call = dict(tool_call)
+    normalized_tool_call["tool"] = normalized_tool_call.pop("name")
+    normalized["tool_call"] = normalized_tool_call
+    return normalized
 
 
 def _validate_envelope_shape(parsed_json: Mapping[str, Any]) -> list[str]:

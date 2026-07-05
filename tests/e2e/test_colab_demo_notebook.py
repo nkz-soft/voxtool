@@ -34,10 +34,12 @@ def test_notebook_documents_required_demo_steps() -> None:
     assert "validation" in text
     assert "final_answer" in text or "final answer" in text
     assert "metric" in text
-    # Every model is compared across all four pipelines (A-D) on the same data.
+    # Scenario A is covered by the text demo; later comparisons cover B-D only.
     assert "compare_pipelines" in text
     assert "all_pipeline_adapters = demo.list_adapters()" in text
-    for pipeline in ("a", "b", "c", "d"):
+    assert 'pipelines=("b", "c", "d")' in text
+    assert "scenario a /" not in text
+    for pipeline in ("b", "c", "d"):
         assert f"**{pipeline}**" in text
 
 
