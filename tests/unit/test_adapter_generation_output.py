@@ -71,6 +71,7 @@ class _FakeProcessorWithoutTemplate(_FakeTokenizer):
         self.tokenizer = self
         self.eos_token = "</s>"
         self.pad_token: str | None = None
+        self.chat_template: str | None = None
         self.default_template_used = False
 
     def __call__(
@@ -82,17 +83,16 @@ class _FakeProcessorWithoutTemplate(_FakeTokenizer):
         self,
         messages: list[dict[str, object]],
         *,
-        chat_template: str | None = None,
         return_tensors: str,
         return_dict: bool,
     ) -> dict[str, list[list[int]]]:
         assert messages[0]["role"] == "user"
         assert return_tensors == "pt"
         assert return_dict is True
-        if chat_template is not None:
+        if self.chat_template is not None:
             self.default_template_used = True
             assert messages[0]["content"] == "prompt"
-            assert "[INST]" in chat_template
+            assert "[INST]" in self.chat_template
             return {"input_ids": [[30, 31, 32]]}
         raise ValueError(
             "Cannot use chat template functions because "

@@ -130,12 +130,22 @@ class VoxtralAdapter:
             if "chat_template" not in str(exc):
                 raise
 
+        self._set_default_text_chat_template(processor)
         return processor.apply_chat_template(
             [{"role": "user", "content": prompt}],
-            chat_template=_VOXTRAL_TEXT_CHAT_TEMPLATE,
             return_tensors="pt",
             return_dict=True,
         )
+
+    def _set_default_text_chat_template(self, processor: Any) -> None:
+        """Install a text chat template for processors that do not ship one."""
+        for target in (processor, getattr(processor, "tokenizer", None)):
+            if target is None:
+                continue
+            try:
+                target.chat_template = _VOXTRAL_TEXT_CHAT_TEMPLATE
+            except AttributeError:
+                continue
 
     def _ensure_padding_token(self, processor: Any) -> None:
         """Use EOS as padding token when the processor tokenizer has none."""
