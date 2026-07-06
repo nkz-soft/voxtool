@@ -35,6 +35,66 @@ def test_audio_example_preserves_dataset_linkage_and_settings() -> None:
     assert payload["synthesis_settings"]["engine"] == "fixture-silent"
 
 
+def test_synthesis_settings_accepts_piper_voice_resources() -> None:
+    settings = SynthesisSettings(
+        engine="piper",
+        voice="ru_RU-irina-medium",
+        voice_model_path=Path("model-files/piper/ru_RU-irina-medium.onnx"),
+        voice_config_path=Path("model-files/piper/ru_RU-irina-medium.onnx.json"),
+        voice_by_language={"ru": "ru_RU-irina-medium", "en": "en_US-lessac-medium"},
+        voice_model_path_by_language={
+            "ru": Path("model-files/piper/ru_RU-irina-medium.onnx"),
+            "en": Path("model-files/piper/en_US-lessac-medium.onnx"),
+        },
+        voice_config_path_by_language={
+            "ru": Path("model-files/piper/ru_RU-irina-medium.onnx.json"),
+            "en": Path("model-files/piper/en_US-lessac-medium.onnx.json"),
+        },
+        sentence_silence=0.2,
+        length_scale=1.0,
+        noise_scale=0.667,
+        noise_w_scale=0.8,
+    )
+
+    payload = settings.model_dump(mode="json")
+
+    assert payload["engine"] == "piper"
+    assert payload["voice"] == "ru_RU-irina-medium"
+    assert payload["voice_by_language"]["en"] == "en_US-lessac-medium"
+    assert payload["voice_model_path"].endswith("ru_RU-irina-medium.onnx")
+
+
+def test_piper_audio_metadata_round_trip_preserves_voice_fields(tmp_path: Path) -> None:
+    settings = SynthesisSettings(
+        engine="piper",
+        voice="ru_RU-irina-medium",
+        voice_model_path=Path("model-files/piper/ru_RU-irina-medium.onnx"),
+        voice_config_path=Path("model-files/piper/ru_RU-irina-medium.onnx.json"),
+    )
+    audio = AudioExample(
+        audio_id="v1-ru-length-0001-audio",
+        example_id="v1-ru-length-0001",
+        dataset_version="v1",
+        language="ru",
+        split="validation",
+        reference_transcript="Переведи 2 километра в метры.",
+        audio_path="audio/v1-ru-length-0001-audio.wav",
+        tts_engine="piper",
+        voice="ru_RU-irina-medium",
+        sample_rate_hz=22_050,
+        duration_ms=640,
+        synthesis_settings=settings,
+    )
+    output = tmp_path / "audio.jsonl"
+
+    write_jsonl(output, [audio])
+    loaded = read_jsonl(output)
+
+    assert loaded == [audio]
+    assert loaded[0].synthesis_settings.voice == "ru_RU-irina-medium"
+    assert loaded[0].synthesis_settings.engine == "piper"
+
+
 def test_audio_example_rejects_invalid_sample_rate() -> None:
     with pytest.raises(ValidationError):
         AudioExample(

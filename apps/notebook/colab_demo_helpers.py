@@ -33,7 +33,11 @@ from packages.pipeline_runner.runner import _AdapterBridge
 from packages.tool_schema.models import ToolArguments, ToolInvocation, Unit
 from packages.tool_schema.providers import ToolExecutor
 from packages.tool_schema.units import default_tool_registry
-from packages.tts_synth.models import AudioExample, SynthesisSettings
+from packages.tts_synth.models import (
+    AudioExample,
+    SynthesisSettings,
+    piper_settings_from_environment,
+)
 from packages.tts_synth.synthesizer import synthesize_dataset
 
 # Stable list of adapters a Colab user can select in the demo notebook. The mock
@@ -262,14 +266,16 @@ def synthesize_demo_audio(
     output_dir: str | Path = "demo_audio",
     settings: SynthesisSettings | None = None,
 ) -> list[AudioExample]:
-    """Generate deterministic test audio from example text instead of uploading.
+    """Generate Piper test audio from example text instead of uploading.
 
-    Uses the local fixture-silent TTS engine, so no upload, cloud service, or
-    model download is required. Each returned :class:`AudioExample` carries the
-    source text as its reference transcript plus a path to a generated WAV file,
-    and can be fed straight into :func:`run_audio_demo`.
+    The default path resolves local Piper voice resources from documented
+    environment variables and fails clearly if they are missing. Pass explicit
+    settings with ``engine="fixture-silent"`` for bounded tests that should not
+    require Piper assets. Each returned :class:`AudioExample` carries the source
+    text as its reference transcript plus a path to a generated WAV file, and can
+    be fed straight into :func:`run_audio_demo`.
     """
-    settings = settings or SynthesisSettings(engine="fixture-silent")
+    settings = settings or piper_settings_from_environment()
     return synthesize_dataset(
         list(examples), output_dir=Path(output_dir), settings=settings
     )
@@ -285,6 +291,7 @@ def audio_summary(audio_examples: Sequence[AudioExample]) -> list[dict[str, Any]
             "audio_path": audio.audio_path,
             "duration_ms": audio.duration_ms,
             "tts_engine": audio.tts_engine,
+            "voice": audio.voice,
         }
         for audio in audio_examples
     ]

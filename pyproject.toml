@@ -40,7 +40,7 @@ finetuning = [
 ]
 speech = [
     "edge-tts>=7.2.8",
-    "piper-tts>=1.2.0",
+    "piper-tts>=1.4.2",
 ]
 quantization = [
     "bitsandbytes>=0.44.0",
@@ -93,7 +93,7 @@ finetuning = [
 ]
 speech = [
     "edge-tts>=7.2.8",
-    "piper-tts>=1.2.0",
+    "piper-tts>=1.4.2",
 ]
 quantization = [
     "bitsandbytes>=0.44.0",

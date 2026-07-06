@@ -11,5 +11,5 @@ Ignore generated/build/cache/dependency directories:
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read
-`specs/003-advanced-benchmark-phases/plan.md`.
+`specs/004-piper-audio-dataset/plan.md`.
 <!-- SPECKIT END -->
