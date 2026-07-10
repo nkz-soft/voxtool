@@ -548,17 +548,19 @@ def compare_pipelines(
     *,
     run_prefix: str = "colab-pipelines",
     config_paths: dict[str, str | Path] | None = None,
+    audio_examples: Sequence[AudioExample] | None = None,
     audio_dir: str | Path = "demo_audio",
     pipelines: Sequence[str] = ALL_PIPELINES,
 ) -> tuple[dict[str, dict[str, list[PipelineRunRecord]]], pd.DataFrame, pd.DataFrame]:
     """Run every model across selected pipelines and compare metrics.
 
-    Synthesizes the audio once from ``dataset`` (defaults to the bilingual
-    :func:`demo_dataset`) so all models and pipelines see identical inputs, then
-    for each adapter runs every supported pipeline and aggregates per-pipeline
-    metrics with the shared :func:`summarize_metrics`. Tool metrics apply to
-    A/C/D, WER to B/D, and a modality gap compares each audio pipeline with the
-    Pipeline A text baseline when Pipeline A is included.
+    Uses ``audio_examples`` when provided, otherwise synthesizes the audio once
+    from ``dataset`` (defaults to the bilingual :func:`demo_dataset`) so all
+    models and pipelines see identical inputs. Then for each adapter runs every
+    supported pipeline and aggregates per-pipeline metrics with the shared
+    :func:`summarize_metrics`. Tool metrics apply to A/C/D, WER to B/D, and a
+    modality gap compares each audio pipeline with the Pipeline A text baseline
+    when Pipeline A is included.
 
     Returns ``(records_by_model, comparison, skips)``:
 
@@ -570,7 +572,11 @@ def compare_pipelines(
     """
     dataset = list(dataset) if dataset is not None else demo_dataset()
     config_paths = config_paths or {}
-    audio_examples = synthesize_demo_audio(dataset, output_dir=audio_dir)
+    audio_examples = (
+        list(audio_examples)
+        if audio_examples is not None
+        else synthesize_demo_audio(dataset, output_dir=audio_dir)
+    )
 
     records_by_model: dict[str, dict[str, list[PipelineRunRecord]]] = {}
     frames: list[pd.DataFrame] = []
