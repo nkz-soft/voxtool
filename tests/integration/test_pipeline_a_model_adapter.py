@@ -6,6 +6,7 @@ from typing import Any
 import pytest
 from apps.notebook.colab_demo_helpers import (
     compare_models,
+    compare_pipelines,
     demo_dataset,
     record_summary,
     run_all_pipelines,
@@ -152,6 +153,36 @@ def test_run_all_pipelines_can_exclude_pipeline_a(tmp_path: Path) -> None:
     assert set(records) == {"B", "D"}
     assert "A" not in records
     assert "A" not in skips
+
+
+def test_compare_pipelines_reuses_supplied_audio_examples(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    dataset = demo_dataset()
+    audio_examples = synthesize_demo_audio(
+        dataset,
+        output_dir=tmp_path / "audio",
+        settings=SynthesisSettings(engine="fixture-silent"),
+    )
+
+    def fail_synthesis(*_args: object, **_kwargs: object) -> list[Any]:
+        raise AssertionError("compare_pipelines should reuse supplied audio examples")
+
+    monkeypatch.setattr(
+        "apps.notebook.colab_demo_helpers.synthesize_demo_audio",
+        fail_synthesis,
+    )
+
+    records_by_model, comparison, skips = compare_pipelines(
+        ["mock"],
+        dataset=dataset,
+        audio_examples=audio_examples,
+        pipelines=("B",),
+    )
+
+    assert set(records_by_model["mock"]) == {"B"}
+    assert not comparison.empty
+    assert skips.empty
 
 
 def test_synthesize_demo_audio_defaults_to_discovered_piper_settings(

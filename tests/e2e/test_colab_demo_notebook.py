@@ -31,6 +31,12 @@ def test_notebook_documents_required_demo_steps() -> None:
     # Audio examples are generated from text, not uploaded.
     assert "synthesize_demo_audio" in text
     assert "piper" in text
+    assert ".[model,notebook,speech]" in text
+    assert "voxtool_piper_voice_model_en" in text
+    assert "voxtool_piper_voice_model_ru" in text
+    assert "write_audio_jsonl" in text
+    assert "missing_audio" in text
+    assert "audio_examples=audio_examples" in text
     assert "files.upload" not in text
     assert "validation" in text
     assert "final_answer" in text or "final answer" in text
