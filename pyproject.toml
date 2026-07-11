@@ -65,7 +65,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.6.0",
     "types-jsonschema>=4.25.1",
-    "types-PyYAML>=6.0.12",
+    "types-PyYAML>=6.0.12.20260518",
 ]
 
 # Optional, heavyweight dependency groups for the advanced benchmark phases.
